@@ -1,7 +1,11 @@
-package com.dongyang.TPOWW;
+package com.dongyang.TPOWW.admin;
 
 import java.io.IOException;
 import java.util.List;
+
+import com.dongyang.TPOWW.member.UserDAO;
+import com.dongyang.TPOWW.member.UserDTO;
+import com.dongyang.TPOWW.member.UserWithPrefDTO;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -32,6 +36,6 @@ public class AdminServlet extends HttpServlet {
 
         request.setAttribute("userList", list);
 
-        request.getRequestDispatcher("admin.jsp").forward(request, response);
+        request.getRequestDispatcher("/admin/admin.jsp").forward(request, response);
     }
 }

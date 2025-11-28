@@ -1,4 +1,4 @@
-package com.dongyang.TPOWW;
+package com.dongyang.TPOWW.member;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -42,7 +42,7 @@ public class RegistServlet extends HttpServlet {
 		
 		if (un == 0) {
 			request.setAttribute("errorMsg", "회원 정보 저장 실패");
-			request.getRequestDispatcher("regist.jsp").forward(request, response);
+			request.getRequestDispatcher("/member/regist.jsp").forward(request, response);
 			return;
 		}
 		

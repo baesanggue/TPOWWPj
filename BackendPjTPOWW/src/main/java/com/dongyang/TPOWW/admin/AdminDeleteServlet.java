@@ -1,4 +1,4 @@
-package com.dongyang.TPOWW;
+package com.dongyang.TPOWW.admin;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -8,6 +8,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+
+import com.dongyang.TPOWW.member.UserDAO;
+import com.dongyang.TPOWW.member.UserDTO;
 
 @WebServlet("/adminDelete.do")
 public class AdminDeleteServlet extends HttpServlet {

@@ -1,4 +1,4 @@
-package com.dongyang.TPOWW;
+package com.dongyang.TPOWW.member;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

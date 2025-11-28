@@ -1,4 +1,4 @@
-package com.dongyang.TPOWW;
+package com.dongyang.TPOWW.member;
 
 public class UserPrefDTO {
 	private int un;

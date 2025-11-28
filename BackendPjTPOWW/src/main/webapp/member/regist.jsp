@@ -7,7 +7,7 @@
 <title>회원 가입</title>
 </head>
 <body>
- <%@ include file="header.jsp" %>
+ <%@ include file="../header.jsp" %>
 	<h3>회원 가입</h3>
 	<form method="post" action="regist.do">
 		id : <input type="text" placeholder="아이디 입력" name="id" required > <br>
@@ -51,6 +51,6 @@
 		  
 		  <input type="submit" value="회원 가입"><input type="reset" value="모두 초기화">
 	</form>
-	<%@ include file="footer.jsp" %>
+	<%@ include file="../footer.jsp" %>
 </body>
 </html>

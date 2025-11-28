@@ -1,9 +1,11 @@
-package com.dongyang.TPOWW;
+package com.dongyang.TPOWW.member;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import com.dongyang.TPOWW.common.JdbcConnectUtil;
 
 public class UserPrefDAO {
 	Connection con = null;

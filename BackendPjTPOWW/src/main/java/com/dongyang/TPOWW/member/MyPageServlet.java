@@ -1,4 +1,6 @@
-package com.dongyang.TPOWW;
+package com.dongyang.TPOWW.member;
+
+import java.io.IOException;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -7,61 +9,59 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import java.io.IOException;
-
-@WebServlet("/adminEdit.do")
-public class AdminEditServlet extends HttpServlet {
+@WebServlet("/mypage.do")
+public class MyPageServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    // 수정 화면 띄우기
+    // 마이페이지 조회 (input에 값 채워서 보여주기)
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false);
-        UserDTO admin = (session != null) ? (UserDTO) session.getAttribute("udto") : null;
+        HttpSession session = request.getSession();
+        UserDTO udto = (UserDTO) session.getAttribute("udto");
 
-        if (admin == null || !"ADMIN".equals(admin.getRole())) {
+        // 로그인 안 되어 있으면 index로 보내기
+        if (udto == null) {
             response.sendRedirect("index.jsp");
             return;
         }
 
-        int un = Integer.parseInt(request.getParameter("un"));
+        int un = udto.getUn();
 
-        UserDAO udao = new UserDAO();
-        UserDTO udto = udao.getUserByUn(un);
-
+        // user_pref 가져오기
         UserPrefDAO pdao = new UserPrefDAO();
         UserPrefDTO pdto = pdao.getUserPref(un);
 
+        // request에 담아서 JSP로 보내기
         request.setAttribute("udto", udto);
         request.setAttribute("pdto", pdto);
 
-        request.getRequestDispatcher("adminEdit.jsp").forward(request, response);
+        request.getRequestDispatcher("/member/mypage.jsp").forward(request, response);
     }
 
-    // 수정 내용 저장
+    // 마이페이지에서 수정한 내용 저장
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
 
-        HttpSession session = request.getSession(false);
-        UserDTO admin = (session != null) ? (UserDTO) session.getAttribute("udto") : null;
+        HttpSession session = request.getSession();
+        UserDTO sessionUser = (UserDTO) session.getAttribute("udto");
 
-        if (admin == null || !"ADMIN".equals(admin.getRole())) {
+        if (sessionUser == null) {
             response.sendRedirect("index.jsp");
             return;
         }
 
-        int un = Integer.parseInt(request.getParameter("un"));
+        int un = sessionUser.getUn();
 
+        // 폼에서 수정된 값 받기
         String uname = request.getParameter("uname");
         String ageStr = request.getParameter("age");
         String gender = request.getParameter("gender");
         String region = request.getParameter("region");
-        String role = request.getParameter("role"); // USER / ADMIN
 
         String brand = request.getParameter("brand");
         String color = request.getParameter("color");
@@ -72,19 +72,19 @@ public class AdminEditServlet extends HttpServlet {
             age = Integer.parseInt(ageStr);
         }
 
-        // user 업데이트
+        // User 수정 DTO
         UserDTO udto = new UserDTO();
         udto.setUn(un);
         udto.setUname(uname);
         udto.setAge(age);
         udto.setGender(gender);
         udto.setRegion(region);
-        udto.setRole(role);
 
         UserDAO udao = new UserDAO();
-        udao.updateUser(udto);   // updateUser에 role도 같이 업데이트하도록 수정하면 더 좋음
+        int r = udao.updateUser(udto);
+        System.out.println("수정 결과 = "+ r);
 
-        // user_pref 업데이트
+        // UserPref 수정 DTO
         UserPrefDTO pdto = new UserPrefDTO();
         pdto.setUn(un);
         pdto.setBrand(brand);
@@ -92,9 +92,17 @@ public class AdminEditServlet extends HttpServlet {
         pdto.setPcolor(pcolor);
 
         UserPrefDAO pdao = new UserPrefDAO();
-        pdao.updateUserPref(pdto);
+        int pr = pdao.updateUserPref(pdto);
+        System.out.println("pref 수정 결과 = " + pr);
 
-        // 수정 후 관리자 목록으로 복귀
-        response.sendRedirect("admin.do");
+        // 세션에 있는 유저 정보도 최신값으로 반영
+        sessionUser.setUname(uname);
+        sessionUser.setAge(age);
+        sessionUser.setGender(gender);
+        sessionUser.setRegion(region);
+        session.setAttribute("udto", sessionUser);
+
+        // 다시 마이페이지로 이동 (PRG 패턴)
+        response.sendRedirect("mypage.do");
     }
 }
