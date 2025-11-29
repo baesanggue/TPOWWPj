@@ -18,7 +18,8 @@
         <th>이름</th>
         <th>나이</th>
         <th>성별</th>
-        <th>지역</th>
+        <th>시/도</th>
+        <th>시/군/구</th>
         <th>ROLE</th>
         <th>브랜드</th>
         <th>색상</th>
@@ -34,6 +35,7 @@
             <td>${u.age}</td>
             <td>${u.gender}</td>
             <td>${u.region}</td>
+            <td>${u.sigungu}</td>
             <td>${u.role}</td>
             <td>${u.brand}</td>
             <td>${u.color}</td>

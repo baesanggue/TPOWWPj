@@ -44,6 +44,14 @@
 		    <option value="Jeju">제주특별자치도 (Jeju)</option>
 		  </select> <br>
 		  
+		<!-- 새로 추가: 시·군·구 선택 -->
+        <label for="sigungu">거주 지역(시·군·구)을 선택하세요:</label>
+        <select id="sigungu" name="sigungu" required>
+            <option value="">-- 시·군·구 선택 --</option>
+            <!-- region 선택에 따라 자바스크립트에서 동적으로 채움 -->
+        </select>
+        <br>
+		  
 		  <h3>선호 정보</h3>
 		  선호 브랜드 : <input type="text" placeholder="브랜드 입력" name="brand" ><br>
 		  선호 색상 : <input type="text" placeholder="색상 또는 계열 입력" name="color" ><br>
@@ -52,5 +60,7 @@
 		  <input type="submit" value="회원 가입"><input type="reset" value="모두 초기화">
 	</form>
 	<%@ include file="../footer.jsp" %>
+	<!-- 시/도 - 시/군/구 연동 자바스크립트 (외부 파일) -->
+    <script src="../js/region.js"></script>
 </body>
 </html>

@@ -35,6 +35,7 @@ public class RegistServlet extends HttpServlet {
 		udto.setAge(Integer.parseInt(request.getParameter("age")));
 		udto.setGender(request.getParameter("gender"));
 		udto.setRegion(request.getParameter("region"));
+		udto.setSigungu(request.getParameter("sigungu"));
 		
 		
 		UserDAO udao = new UserDAO();

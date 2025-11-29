@@ -20,8 +20,8 @@ public class UserDAO {
 	public int registUser(UserDTO udto) {
 		int dbok = 0;
 		int un = 0;
-		String sql = "insert into user (id, pw, uname, age, gender, region)"
-				+ "values (?,?,?,?,?,?)";
+		String sql = "insert into user (id, pw, uname, age, gender, region, sigungu)"
+				+ "values (?,?,?,?,?,?, ?)";
 		con =JdbcConnectUtil.getConnection();
 		
 		try {
@@ -32,6 +32,7 @@ public class UserDAO {
 			pstmt.setInt(4, udto.getAge());
 			pstmt.setString(5, udto.getGender());
 			pstmt.setString(6, udto.getRegion());
+			pstmt.setString(7, udto.getSigungu());
 			
 			dbok = pstmt.executeUpdate();
 			
@@ -51,7 +52,7 @@ public class UserDAO {
 	}
 	public UserDTO userLogin(UserDTO udto) {
 		con = JdbcConnectUtil.getConnection();
-		String sql = "select un, id, pw, uname, age, gender, region, role "+" from user where id = ? and pw = ?";
+		String sql = "select un, id, pw, uname, age, gender, region, sigungu, role "+" from user where id = ? and pw = ?";
 		try {
 			pstmt = con.prepareStatement(sql);
 			pstmt.setString(1, udto.getId());
@@ -68,6 +69,7 @@ public class UserDAO {
 				udto.setAge(rs.getInt("age"));
 				udto.setGender(rs.getString("gender"));
 				udto.setRegion(rs.getString("region"));
+				udto.setSigungu(rs.getString("sigungu"));
 				udto.setRole(rs.getString("role"));
 			}
 			
@@ -84,14 +86,15 @@ public class UserDAO {
 
 	    try {
 	        con = JdbcConnectUtil.getConnection();
-	        String sql = "UPDATE user SET uname = ?, age = ?, gender = ?, region = ? " +
+	        String sql = "UPDATE user SET uname = ?, age = ?, gender = ?, region = ? , sigungu = ?" +
 	                     "WHERE un = ?";
 	        pstmt = con.prepareStatement(sql);
 	        pstmt.setString(1, udto.getUname());
 	        pstmt.setInt(2, udto.getAge());
 	        pstmt.setString(3, udto.getGender());
 	        pstmt.setString(4, udto.getRegion());
-	        pstmt.setInt(5, udto.getUn());
+	        pstmt.setNString(5, udto.getSigungu());
+	        pstmt.setInt(6, udto.getUn());
 
 	        result = pstmt.executeUpdate();
 	    } catch (SQLException e) {
@@ -125,7 +128,7 @@ public class UserDAO {
 		List<UserWithPrefDTO> list = new ArrayList<>();
 		con = JdbcConnectUtil.getConnection();
 		String sql =
-			    "SELECT u.un, u.id, u.uname, u.age, u.gender, u.region, u.role, " +
+			    "SELECT u.un, u.id, u.uname, u.age, u.gender, u.region, u.sigungu, u.role, " +
 			    "       p.brand, p.color, p.pcolor " +  // ← 뒤에 공백 꼭!
 			    "FROM user u " +
 			    "LEFT JOIN user_pref p ON u.un = p.un " +
@@ -143,7 +146,9 @@ public class UserDAO {
 		        dto.setAge(rs.getInt("age"));
 		        dto.setGender(rs.getString("gender"));
 		        dto.setRegion(rs.getString("region"));
+		        dto.setSigungu(rs.getString("sigungu"));
 		        dto.setRole(rs.getString("role"));
+		       
 
 		        dto.setBrand(rs.getString("brand"));
 		        dto.setColor(rs.getString("color"));
@@ -164,7 +169,7 @@ public class UserDAO {
 		UserDTO udto = null;
 		
 		con = JdbcConnectUtil.getConnection();
-		String sql = "SELECT un, id, pw, uname, age, gender, region, role " +
+		String sql = "SELECT un, id, pw, uname, age, gender, region, sigungu, role " +
                 "FROM user WHERE un = ?";
 		try {
 			pstmt = con.prepareStatement(sql);
@@ -180,6 +185,7 @@ public class UserDAO {
 	            udto.setAge(rs.getInt("age"));
 	            udto.setGender(rs.getString("gender"));
 	            udto.setRegion(rs.getString("region"));
+	            udto.setSigungu(rs.getString("sigungu"));
 	            udto.setRole(rs.getString("role"));
 			}
 		} catch (SQLException e) {

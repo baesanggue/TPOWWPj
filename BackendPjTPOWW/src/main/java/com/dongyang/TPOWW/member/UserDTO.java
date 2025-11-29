@@ -8,7 +8,14 @@ public class UserDTO {
 	    private int age;
 	    private String gender;
 	    private String region;
-	    private String role;
+	    private String sigungu;
+	    public String getSigungu() {
+			return sigungu;
+		}
+		public void setSigungu(String sigungu) {
+			this.sigungu = sigungu;
+		}
+		private String role;
 		public String getRole() {
 			return role;
 		}

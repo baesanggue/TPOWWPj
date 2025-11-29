@@ -25,8 +25,10 @@
         <c:if test="${udto.gender == 'female'}">checked</c:if>> 여
     <br>
 
-    지역: <input type="text" name="region" value="${udto.region}"><br>
-
+    지역(시/도) : <input type="text" name="region" value="${udto.region}"><br>
+	 지역(시·군·구):
+    <input type="text" name="sigungu" value="${udto.sigungu}"><br> <!-- ⭐ 추가 -->
+    <br>
     ROLE:
     <select name="role">
         <option value="USER"  ${udto.role == 'USER'  ? 'selected' : ''}>USER</option>

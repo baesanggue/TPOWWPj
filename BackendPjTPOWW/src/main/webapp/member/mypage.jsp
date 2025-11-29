@@ -33,7 +33,7 @@
 
         지역:
         <input type="text" name="region" value="${sessionScope.udto.region}"><br>
-
+		<input type="text" name="sigungu" value="${sessionScope.udto.sigungu}"><br>
         <hr>
 
         <!-- 선호 정보 (user_pref) -->

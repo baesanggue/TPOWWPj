@@ -84,4 +84,31 @@ public class UserPrefDAO {
 
         return result; // 1이면 성공
     }
+    
+    public UserPrefDTO getUserPrefByUn(int un) {
+    	UserPrefDTO pdto = null;
+    	
+    	con = JdbcConnectUtil.getConnection();
+    	String sql = "SELECT un, brand, color, pcolor FROM user_pref WHERE un = ?";
+    	
+    	try {
+			pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1, un);
+			rs = pstmt.executeQuery();
+			
+			if (rs.next()) {
+				pdto = new UserPrefDTO();
+				pdto.setUn(rs.getInt("un"));
+				pdto.setBrand(rs.getString("brand"));
+				pdto.setColor(rs.getString("color"));
+				pdto.setPcolor(rs.getString("pcolor"));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			JdbcConnectUtil.Close(con, pstmt, rs);
+		}
+    	return pdto;
+    }
 }

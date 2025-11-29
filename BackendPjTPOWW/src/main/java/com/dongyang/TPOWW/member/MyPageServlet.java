@@ -62,6 +62,7 @@ public class MyPageServlet extends HttpServlet {
         String ageStr = request.getParameter("age");
         String gender = request.getParameter("gender");
         String region = request.getParameter("region");
+        String sigungu = request.getParameter("sigungu");
 
         String brand = request.getParameter("brand");
         String color = request.getParameter("color");
@@ -79,6 +80,7 @@ public class MyPageServlet extends HttpServlet {
         udto.setAge(age);
         udto.setGender(gender);
         udto.setRegion(region);
+        udto.setSigungu(sigungu);
 
         UserDAO udao = new UserDAO();
         int r = udao.updateUser(udto);
@@ -100,6 +102,7 @@ public class MyPageServlet extends HttpServlet {
         sessionUser.setAge(age);
         sessionUser.setGender(gender);
         sessionUser.setRegion(region);
+        sessionUser.setSigungu(sigungu);
         session.setAttribute("udto", sessionUser);
 
         // 다시 마이페이지로 이동 (PRG 패턴)

@@ -66,6 +66,7 @@ public class AdminEditServlet extends HttpServlet {
         String ageStr = request.getParameter("age");
         String gender = request.getParameter("gender");
         String region = request.getParameter("region");
+        String sigungu = request.getParameter("sigungu");
         String role = request.getParameter("role"); // USER / ADMIN
 
         String brand = request.getParameter("brand");
@@ -84,6 +85,7 @@ public class AdminEditServlet extends HttpServlet {
         udto.setAge(age);
         udto.setGender(gender);
         udto.setRegion(region);
+        udto.setSigungu(sigungu);
         udto.setRole(role);
 
         UserDAO udao = new UserDAO();
