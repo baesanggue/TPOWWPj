@@ -26,7 +26,7 @@
         나중에 tpoRecommend.do 서블릿에서 이 값들을 받아서 
         기상청 API + AI API 에 넘길 예정
     -->
-    <form action="tpoRecommend.do" method="post">
+    <form action="<c:url value='/tpoRecommend.do' />" method="post">
         <!-- 0. 기본 정보 표시 (id, 이름 정도) -->
         <p>
             <strong>ID:</strong> ${sessionScope.udto.id}<br>
@@ -146,7 +146,7 @@
         <!-- 8. 전송 버튼 -->
         <div>
             <button type="submit">AI에게 코디 추천 받기</button>
-            <a href="index.jsp">메인으로</a>
+            <a href="<c:url value='/index.jsp' />">메인으로</a>
         </div>
     </form>
 </c:if>

@@ -11,7 +11,7 @@
 <body>
 <h2>관리자 - 회원 정보 수정 (UN: ${udto.un})</h2>
 
-<form action="adminEdit.do" method="post">
+<form action="<c:url value='/adminEdit.do' />" method="post">
     <input type="hidden" name="un" value="${udto.un}">
 
     ID: <input type="text" name="id" value="${udto.id}" readonly><br>
@@ -41,7 +41,7 @@
     퍼스널 컬러: <input type="text" name="pcolor" value="${pdto.pcolor}"><br>
 
     <input type="submit" value="수정 저장">
-    <a href="admin.do">목록으로</a>
+    <a href="<c:url value='/admin.do' />">목록으로</a>
 </form>
 
 </body>

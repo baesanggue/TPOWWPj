@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+    
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,7 +11,7 @@
 <body>
  <%@ include file="../header.jsp" %>
 	<h3>회원 가입</h3>
-	<form method="post" action="regist.do">
+	<form method="post" action="<c:url value='/regist.do' />">
 		id : <input type="text" placeholder="아이디 입력" name="id" required > <br>
 		password : <input type="password" placeholder="패스워드 입력" name="pw" required > <br>
 		이름 : <input type="text" placeholder="이름 입력" name="uname" required > <br>

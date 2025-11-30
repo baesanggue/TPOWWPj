@@ -50,7 +50,7 @@
 
                 <!-- 여기 나중에 "수정" 버튼도 붙일 수 있음 -->
                 <!-- 관리자 수정 페이지로 이동 -->
-    			<form action="adminEdit.do" method="get" style="display:inline;">
+    			<form action="<c:url value='/adminEdit.do' />" method="get" style="display:inline;">
         			<input type="hidden" name="un" value="${u.un}">
         			<input type="submit" value="수정">
    				</form>

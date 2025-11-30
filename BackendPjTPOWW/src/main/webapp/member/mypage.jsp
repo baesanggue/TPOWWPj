@@ -49,11 +49,11 @@
         <input type="submit" value="정보 수정하기">
     </form>
     <hr>
-    <form action="withdraw.do" method="post"
+    <form action="<c:url value='/withdraw.do' />" method="post"
       onsubmit="return confirm('정말 탈퇴하시겠습니까?');">
     <input type="submit" value="회원 탈퇴">
 	</form>
-    <a href="index.jsp">메인으로</a>
+    <a href="<c:url value='/index.jsp' />">메인으로</a>
 </c:if>
 
 </body>

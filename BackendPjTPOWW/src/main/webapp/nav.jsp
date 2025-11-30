@@ -20,7 +20,7 @@
 			password: <input type="password" name="pw" placeholder="PASSWORD">
 			<input type="submit" value="login">
 			<input type="reset" value="reset">
-			<a href="regist.jsp">회원 가입</a>
+			<a href="<c:url value='/member/regist.jsp' />">회원 가입</a>
 		</form>
 	</c:if>
 
