@@ -48,8 +48,7 @@ public class WeatherServlet extends HttpServlet {
         String apiUrl = urlBuilder.toString();
 
         String jsonResponse = "";
-        String t1h = "정보 없음";
-        String reh = "정보 없음";
+        HttpSession session = request.getSession();
 
         try (BufferedReader rd = new BufferedReader(
                 new InputStreamReader(
@@ -62,28 +61,28 @@ public class WeatherServlet extends HttpServlet {
             }
             jsonResponse = sb.toString();
 
-            // JSON에서 값 추출
-            t1h = extractValue(jsonResponse, "T1H");
-            reh = extractValue(jsonResponse, "REH");
+            // 필요한 값만 추출
+            session.setAttribute("t1h", extractValue(jsonResponse, "T1H")); // 기온
+            session.setAttribute("reh", extractValue(jsonResponse, "REH")); // 습도
+            session.setAttribute("rn1", extractValue(jsonResponse, "RN1")); // 강수량
+            session.setAttribute("wsd", extractValue(jsonResponse, "WSD")); // 바람
 
         } catch (Exception e) {
-            t1h = "오류 발생: " + e.getMessage();
-            reh = "오류 발생: " + e.getMessage();
+            // 오류 발생 시 기본 메시지
+            session.setAttribute("t1h", "오류 발생");
+            session.setAttribute("reh", "오류 발생");
+            session.setAttribute("rn1", "오류 발생");
+            session.setAttribute("wsd", "오류 발생");
         }
 
-        // session에 저장 (redirect 후에도 값 유지)
-        HttpSession session = request.getSession();
-        session.setAttribute("t1h", t1h);
-        session.setAttribute("reh", reh);
-
-        // redirect로 index.jsp 호출
+        // index.jsp로 redirect
         response.sendRedirect("index.jsp");
     }
 
-    // category가 일치하는 항목의 obsrValue를 추출
+    // category가 일치하는 항목의 obsrValue 추출
     private String extractValue(String json, String category) {
         String pattern = "\\{[^}]*\"category\"\\s*:\\s*\"" + category + "\"[^}]*\"obsrValue\"\\s*:\\s*\"([^\"]+)\"[^}]*\\}";
         Matcher m = Pattern.compile(pattern).matcher(json);
-        return m.find() ? m.group(1) : null;
+        return m.find() ? m.group(1) : "정보 없음";
     }
 }
