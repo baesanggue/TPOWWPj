@@ -1,18 +1,10 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>main</title>
-</head>
-<body>
-	<hr>
-	<h1>MAIN</h1>
-	<p>jiyul branch 추가 테스트</p>
-	
-	<form action="tpo.do" method="get" style="display:inline;">
-    	<button type="submit">TPO 코디 추천</button>
-	</form>
-</body>
-</html>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<h2>📌 기상청 현재 날씨 정보</h2>
+
+<%
+    String t1h = (String) session.getAttribute("t1h");
+    String reh = (String) session.getAttribute("reh");
+%>
+
+<p>기온(T1H): <%= t1h %> ℃</p>
+<p>습도(REH): <%= reh %> %</p>
