@@ -11,30 +11,36 @@
 </head>
 <body>
 
-	<span>nav</span>
+   <span>nav</span>
 
-	<!-- 로그인 X (session에 loginUser 없음) -->
-	<c:if test="${empty sessionScope.udto}">
-		<form method="post" action="login.do">
-			id: <input type="text" name="id" placeholder="ID">
-			password: <input type="password" name="pw" placeholder="PASSWORD">
-			<input type="submit" value="login">
-			<input type="reset" value="reset">
-			<a href="<c:url value='/member/regist.jsp' />">회원 가입</a>
-		</form>
-	</c:if>
+   <!-- 로그인 X (session에 udto 없음) -->
+   <c:if test="${empty sessionScope.udto}">
+   
+      <!-- 로그인 실패 메시지 -->
+      <c:if test="${not empty requestScope.errorMsg}">
+         <p style="color:red;">${requestScope.errorMsg}</p>
+      </c:if>
 
-	<!-- 로그인 O -->
-	<c:if test="${not empty sessionScope.udto}">
-		<p>
-			<strong>${sessionScope.udto.uname}</strong> 님 환영합니다! 
-			<a href="mypage.do">마이페이지</a> 
-			<c:if test="${sessionScope.udto.role == 'ADMIN' }">
-				<a href="admin.do">관리자 페이지</a>
-			</c:if>
-			<a href="logout.do">로그아웃</a>
-		</p>
-	</c:if>
+      <form method="post" action="login.do">
+         id: <input type="text" name="id" placeholder="ID">
+         password: <input type="password" name="pw" placeholder="PASSWORD">
+         <input type="submit" value="login">
+         <input type="reset" value="reset">
+         <a href="<c:url value='/member/regist.jsp' />">회원 가입</a>
+      </form>
+   </c:if>
+
+   <!-- 로그인 O (session에 udto 있음) -->
+   <c:if test="${not empty sessionScope.udto}">
+      <p>
+         <strong>${sessionScope.udto.uname}</strong> 님 환영합니다! 
+         <a href="mypage.do">마이페이지</a> 
+         <c:if test="${sessionScope.udto.role == 'ADMIN' }">
+            <a href="admin.do">관리자 페이지</a>
+         </c:if>
+         <a href="logout.do">로그아웃</a>
+      </p>
+   </c:if>
 
 </body>
 </html>

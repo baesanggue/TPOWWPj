@@ -39,7 +39,7 @@ public class LoginServlet extends HttpServlet {
 			System.out.println("로그인 성공 ");
 			System.out.println(udto.getUn());
 			
-			response.sendRedirect("index.jsp");
+			response.sendRedirect("weather.do");
 		} else {
 			request.setAttribute("errorMsg", "아이디 또는 비밀 번호가 올바르지 않습니다. ");
 			request.getRequestDispatcher("index.jsp").forward(request, response);

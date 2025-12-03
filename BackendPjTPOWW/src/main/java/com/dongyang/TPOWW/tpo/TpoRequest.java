@@ -12,7 +12,15 @@ public class TpoRequest {
     private String time;     // HH:mm
     private String what;     // 활동 내용
 
-    private String brand;
+    private String weatherInfo;
+    
+	public String getWeatherInfo() {
+		return weatherInfo;
+	}
+	public void setWeatherInfo(String weatherInfo) {
+		this.weatherInfo = weatherInfo;
+	}
+	private String brand;
     private String color;
     private String pcolor;
 

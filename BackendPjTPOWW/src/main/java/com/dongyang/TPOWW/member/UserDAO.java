@@ -51,60 +51,64 @@ public class UserDAO {
 		return un;
 	}
 	public UserDTO userLogin(UserDTO udto) {
-		con = JdbcConnectUtil.getConnection();
-		String sql = "select un, id, pw, uname, age, gender, region, sigungu, role "+" from user where id = ? and pw = ?";
-		try {
-			pstmt = con.prepareStatement(sql);
-			pstmt.setString(1, udto.getId());
-			pstmt.setString(2, udto.getPw());
-			
-			rs = pstmt.executeQuery();
-			
-			if (rs.next()) {
-				udto = new UserDTO();
-				udto.setUn(rs.getInt("un"));
-				udto.setId(rs.getString("id"));
-				udto.setPw(rs.getString("pw"));
-				udto.setUname(rs.getString("uname"));
-				udto.setAge(rs.getInt("age"));
-				udto.setGender(rs.getString("gender"));
-				udto.setRegion(rs.getString("region"));
-				udto.setSigungu(rs.getString("sigungu"));
-				udto.setRole(rs.getString("role"));
-			}
-			
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			JdbcConnectUtil.Close(con, pstmt);
-		}
-		return udto;
-	}
+	       con = JdbcConnectUtil.getConnection();
+	       String sql = "select un, id, pw, uname, age, gender, region, sigungu, role from user where id = ? and pw = ?";
+
+	       try {
+	           pstmt = con.prepareStatement(sql);
+	           pstmt.setString(1, udto.getId());
+	           pstmt.setString(2, udto.getPw());
+	           
+	           rs = pstmt.executeQuery();
+	           
+	           if (rs.next()) {
+	               // DB에서 값 덮어쓰기
+	               udto.setUn(rs.getInt("un"));
+	               udto.setId(rs.getString("id"));
+	               udto.setPw(rs.getString("pw"));
+	               udto.setUname(rs.getString("uname"));
+	               udto.setAge(rs.getInt("age"));
+	               udto.setGender(rs.getString("gender"));
+	               udto.setRegion(rs.getString("region"));
+	               udto.setSigungu(rs.getString("sigungu"));
+	               udto.setRole(rs.getString("role"));
+	           } else {
+	               // 로그인 실패 시 null 반환
+	               udto = null;
+	           }
+	           
+	       } catch (SQLException e) {
+	           e.printStackTrace();
+	       } finally {
+	           JdbcConnectUtil.Close(con, pstmt);
+	       }
+	       return udto;
+	   }
 	public int updateUser(UserDTO udto) {
-	    int result = 0;
+	       int result = 0;
 
-	    try {
-	        con = JdbcConnectUtil.getConnection();
-	        String sql = "UPDATE user SET uname = ?, age = ?, gender = ?, region = ? , sigungu = ?" +
-	                     "WHERE un = ?";
-	        pstmt = con.prepareStatement(sql);
-	        pstmt.setString(1, udto.getUname());
-	        pstmt.setInt(2, udto.getAge());
-	        pstmt.setString(3, udto.getGender());
-	        pstmt.setString(4, udto.getRegion());
-	        pstmt.setNString(5, udto.getSigungu());
-	        pstmt.setInt(6, udto.getUn());
+	       try {
+	           con = JdbcConnectUtil.getConnection();
+	           String sql = "UPDATE user SET uname = ?, age = ?, gender = ?, region = ?, sigungu = ?, role = ? " +
+	                        "WHERE un = ?";
+	           pstmt = con.prepareStatement(sql);
+	           pstmt.setString(1, udto.getUname());
+	           pstmt.setInt(2, udto.getAge());
+	           pstmt.setString(3, udto.getGender());
+	           pstmt.setString(4, udto.getRegion());
+	           pstmt.setNString(5, udto.getSigungu());
+	           pstmt.setString(6, udto.getRole());   // ⭐ role 추가
+	           pstmt.setInt(7, udto.getUn());
 
-	        result = pstmt.executeUpdate();
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    } finally {
-	        JdbcConnectUtil.Close(con, pstmt);
-	    }
+	           result = pstmt.executeUpdate();
+	       } catch (SQLException e) {
+	           e.printStackTrace();
+	       } finally {
+	           JdbcConnectUtil.Close(con, pstmt);
+	       }
 
-	    return result;
-	}
+	       return result;
+	   }
 	public int deleteUser(int un) {
 		int result = 0;
 		

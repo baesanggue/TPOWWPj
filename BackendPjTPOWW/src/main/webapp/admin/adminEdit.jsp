@@ -26,14 +26,22 @@
     <br>
 
     지역(시/도) : <input type="text" name="region" value="${udto.region}"><br>
-	 지역(시·군·구):
-    <input type="text" name="sigungu" value="${udto.sigungu}"><br> <!-- ⭐ 추가 -->
+    지역(시·군·구): <input type="text" name="sigungu" value="${udto.sigungu}"><br>
     <br>
+
     ROLE:
-    <select name="role">
-        <option value="USER"  ${udto.role == 'USER'  ? 'selected' : ''}>USER</option>
-        <option value="ADMIN" ${udto.role == 'ADMIN' ? 'selected' : ''}>ADMIN</option>
-    </select>
+    <c:choose>
+        
+        <c:when test="${sessionScope.udto.un == udto.un || udto.role == 'ADMIN'}">
+            <input type="text" value="${udto.role}" readonly>
+        </c:when>
+        <c:otherwise>
+            <select name="role">
+                <option value="USER"  ${udto.role == 'USER'  ? 'selected' : ''}>USER</option>
+                <option value="ADMIN" ${udto.role == 'ADMIN' ? 'selected' : ''}>ADMIN</option>
+            </select>
+        </c:otherwise>
+    </c:choose>
     <br><br>
 
     선호 브랜드: <input type="text" name="brand" value="${pdto.brand}"><br>
@@ -43,6 +51,15 @@
     <input type="submit" value="수정 저장">
     <a href="<c:url value='/admin.do' />">목록으로</a>
 </form>
+
+<!-- 탈퇴 버튼 조건부 표시: 본인 및 다른 관리자 삭제 불가 -->
+<c:if test="${sessionScope.udto.un != udto.un && udto.role != 'ADMIN'}">
+    <form action="<c:url value='/adminDelete.do' />" method="post"
+          onsubmit="return confirm('정말 이 회원을 삭제하시겠습니까?');">
+        <input type="hidden" name="un" value="${udto.un}">
+        <input type="submit" value="탈퇴">
+    </form>
+</c:if>
 
 </body>
 </html>

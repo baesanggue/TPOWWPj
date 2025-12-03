@@ -16,21 +16,19 @@ public class TpoService {
     }
 
     public TpoResult recommend(TpoRequest req) throws IOException {
-        // 1. 날씨 요약
-        String weatherSummary = weatherService.getWeatherSummary(
-                req.getDate(),
-                req.getTime(),
-                req.getRegion(),
-                req.getSigungu()
-        );
+    	// [수정] 서블릿에서 만들어준 날씨 문자열을 그대로 가져옵니다.
+        String weatherSummary = req.getWeatherInfo();
+        if (weatherSummary == null || weatherSummary.isEmpty()) {
+            weatherSummary = "날씨 정보 없음";
+        }
 
-        // 2. 프롬프트 생성
+        // 2. 프롬프트 생성 (날씨 정보 포함)
         String prompt = buildPrompt(req, weatherSummary);
 
-        // 3. LLM 호출
+        // 3. AI(LLM) 호출
         String aiText = llmClient.generate(prompt);
 
-        // 4. 결과 래핑
+        // 4. 결과 포장
         TpoResult result = new TpoResult();
         result.setWeatherSummary(weatherSummary);
         result.setAiRecommend(aiText);

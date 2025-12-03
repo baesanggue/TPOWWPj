@@ -3,7 +3,7 @@
 <%
     // 세션에 날씨 정보가 없으면 WeatherServlet로 자동 redirect
     if (session.getAttribute("t1h") == null || session.getAttribute("reh") == null) {
-        response.sendRedirect("weather");
+        response.sendRedirect("weather.do");
         return; // redirect 후 JSP 실행 방지
     }
 %>
