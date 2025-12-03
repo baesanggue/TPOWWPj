@@ -30,7 +30,7 @@ public class TpoServlet extends HttpServlet {
 		UserDTO udto = (UserDTO) session.getAttribute("udto");
 		
 		if (udto == null) {
-			response.sendRedirect("login.jsp");
+			response.sendRedirect("login.do");
 			return;
 		}
 		
