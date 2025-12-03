@@ -6,7 +6,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>관리자 페이지</title>
+<title>관리자 페이지 - 회원 목록</title>
 </head>
 <body>
 <h2>관리자 페이지 - 회원 목록</h2>
@@ -41,23 +41,30 @@
             <td>${u.color}</td>
             <td>${u.pcolor}</td>
             <td>
-                <!-- 강제 탈퇴 -->
-                <form action="adminDelete.do" method="post" style="display:inline;"
-                      onsubmit="return confirm('정말 이 회원을 삭제하시겠습니까?');">
-                    <input type="hidden" name="un" value="${u.un}">
-                    <input type="submit" value="탈퇴">
-                </form>
+                <!-- 탈퇴 버튼 조건부 표시 -->
+                <c:if test="${sessionScope.udto.un != u.un && u.role != 'ADMIN'}">
+                    <form action="adminDelete.do" method="post" style="display:inline;"
+                          onsubmit="return confirm('정말 이 회원을 삭제하시겠습니까?');">
+                        <input type="hidden" name="un" value="${u.un}">
+                        <input type="submit" value="탈퇴">
+                    </form>
+                </c:if>
 
-                <!-- 여기 나중에 "수정" 버튼도 붙일 수 있음 -->
                 <!-- 관리자 수정 페이지로 이동 -->
-    			<form action="<c:url value='/adminEdit.do' />" method="get" style="display:inline;">
-        			<input type="hidden" name="un" value="${u.un}">
-        			<input type="submit" value="수정">
-   				</form>
+                <form action="<c:url value='/adminEdit.do' />" method="get" style="display:inline;">
+                    <input type="hidden" name="un" value="${u.un}">
+                    <input type="submit" value="수정">
+                </form>
             </td>
         </tr>
     </c:forEach>
 </table>
+
+<p>
+    <a href="<c:url value='/index.jsp' />">
+        <button type="button">메인 페이지로 이동</button>
+    </a>
+</p>
 
 </body>
 </html>

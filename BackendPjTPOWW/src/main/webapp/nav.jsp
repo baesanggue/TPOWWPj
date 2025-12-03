@@ -13,8 +13,14 @@
 
 	<span>nav</span>
 
-	<!-- 로그인 X (session에 loginUser 없음) -->
+	<!-- 로그인 X (session에 udto 없음) -->
 	<c:if test="${empty sessionScope.udto}">
+	
+		<!-- 로그인 실패 메시지 -->
+		<c:if test="${not empty requestScope.errorMsg}">
+			<p style="color:red;">${requestScope.errorMsg}</p>
+		</c:if>
+
 		<form method="post" action="login.do">
 			id: <input type="text" name="id" placeholder="ID">
 			password: <input type="password" name="pw" placeholder="PASSWORD">
@@ -24,7 +30,7 @@
 		</form>
 	</c:if>
 
-	<!-- 로그인 O -->
+	<!-- 로그인 O (session에 udto 있음) -->
 	<c:if test="${not empty sessionScope.udto}">
 		<p>
 			<strong>${sessionScope.udto.uname}</strong> 님 환영합니다! 
