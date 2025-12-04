@@ -1,76 +1,83 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
-<div class="container" style="text-align: center; padding: 20px;">
-    <h1>오늘의 날씨와 옷차림</h1>
+        <div class="container">
+            <div class="current-weather-display">
+                <h2 class="border-none mb-10">
+                    ${not empty currentRegion ? currentRegion : '서울특별시 (기본)'}
+                </h2>
 
-    <div class="region-info" style="margin-bottom: 20px;">
-        <h3 style="color: #333;">
-            📍 현재 위치: 
-            <span style="color: #007bff;">
-                ${not empty currentRegion ? currentRegion : '서울특별시 (기본)'}
-            </span>
-        </h3>
-        <c:if test="${empty sessionScope.udto}">
-            <p style="color: gray; font-size: 0.9em;">
-                (로그인하시면 회원가입 시 등록한 지역의 날씨를 볼 수 있습니다)
-            </p>
-        </c:if>
-    </div>
+                <c:choose>
+                    <c:when test="${not empty weatherError or t1h eq '-'}">
+                        <div class="weather-error-box">
+                            <p class="emoji-large">⚠️</p>
+                            <p>날씨 정보를 불러올 수 없습니다.</p>
+                            <p class="font-small">(기상청 API 응답 없음)</p>
+                            <button type="button" class="btn-secondary small mt-10"
+                                onclick="location.href='weather.do'">다시 시도</button>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="big-icon">
+                            <c:choose>
+                                <c:when test="${pty eq '1' or pty eq '4' or pty eq '5'}">🌧️</c:when>
+                                <c:when test="${pty eq '2' or pty eq '3' or pty eq '6' or pty eq '7'}">☃️</c:when>
+                                <c:otherwise>☀️</c:otherwise>
+                            </c:choose>
+                        </div>
 
-    <div class="weather-section" style="background-color: #f0f8ff; padding: 20px; border-radius: 10px; margin: 0 auto; max-width: 800px;">
-        <h2>현재 날씨</h2>
-        
-        <c:choose>
-            <c:when test="${not empty t1h}">
-                <div style="font-size: 1.2em; margin: 15px 0;">
-                    <span style="margin: 0 15px;">기온: <strong>${t1h}℃</strong></span>
-                    <span style="margin: 0 15px;">습도: <strong>${reh}%</strong></span>
-                    <span style="margin: 0 15px;">강수량: <strong>${rn1}mm</strong></span>
-                    <span style="margin: 0 15px;">바람: <strong>${wsd}m/s</strong></span>
+                        <div class="big-temp">
+                            ${not empty t1h ? t1h : '-'}°
+                        </div>
+
+                        <div class="weather-desc">
+                            <c:choose>
+                                <c:when test="${pty eq '1' or pty eq '4' or pty eq '5'}">비</c:when>
+                                <c:when test="${pty eq '2' or pty eq '3' or pty eq '6' or pty eq '7'}">눈/비</c:when>
+                                <c:otherwise>맑음 (강수없음)</c:otherwise>
+                            </c:choose>
+                            <span class="font-small text-gray">
+                                습도 ${reh}% / 바람 ${wsd}m/s
+                            </span>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+
+                <div class="button-group center mt-20">
+                    <button type="button" class="btn-tpo" onclick="location.href='tpo.do'">
+                        TPO 추천
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="location.href='mypage.do'"
+                        style="margin-top: 20px; padding: 15px 30px; font-size: 1.2em; border-radius: 30px;">
+                        마이페이지
+                    </button>
                 </div>
-            </c:when>
-            <c:otherwise>
-                <p>날씨 정보를 불러오는 중입니다... <a href="weather">새로고침</a></p>
-            </c:otherwise>
-        </c:choose>
+            </div>
 
-        <hr style="margin: 20px 0; border-top: 1px solid #ddd;">
+            <!-- 3-Day Forecast -->
+            <c:if test="${not empty threeDayForecast}">
+                <div class="forecast-container">
+                    <c:forEach var="day" items="${threeDayForecast}">
+                        <div class="daily-card">
+                            <div class="daily-day">${day.dayOfWeek}</div>
+                            <div class="daily-date font-small text-dark-gray">${day.date}</div>
 
-        <h3>단기 예보</h3>
-        <c:if test="${not empty forecastList}">
-            <table border="1" style="margin: 0 auto; width: 90%; border-collapse: collapse; text-align: center; background-color: white;">
-                <thead style="background-color: #e6e6fa;">
-                    <tr>
-                        <th style="padding: 8px;">날짜</th>
-                        <th style="padding: 8px;">시간</th>
-                        <th style="padding: 8px;">항목</th>
-                        <th style="padding: 8px;">예보값</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:forEach var="item" items="${forecastList}" end="5">
-                        <tr>
-                            <td style="padding: 8px;">${item.fcstDate}</td>
-                            <td style="padding: 8px;">${item.fcstTime}</td>
-                            <td style="padding: 8px;">${item.category}</td>
-                            <td style="padding: 8px;">
-                                ${item.fcstValue}
-                                <c:if test="${item.category eq 'TMP'}">℃</c:if>
-                                <c:if test="${item.category eq 'REH'}">%</c:if>
-                            </td>
-                        </tr>
+                            <div class="weather-icon">
+                                <c:choose>
+                                    <c:when test="${day.weatherState eq 'sunny'}">☀️</c:when>
+                                    <c:when test="${day.weatherState eq 'cloudy'}">☁️</c:when>
+                                    <c:when test="${day.weatherState eq 'rainy'}">🌧️</c:when>
+                                    <c:when test="${day.weatherState eq 'snowy'}">☃️</c:when>
+                                    <c:otherwise>❓</c:otherwise>
+                                </c:choose>
+                            </div>
+
+                            <div class="temp-range">
+                                <span class="temp-min">${day.minTemp}°</span> /
+                                <span class="temp-max">${day.maxTemp}°</span>
+                            </div>
+                        </div>
                     </c:forEach>
-                </tbody>
-            </table>
-        </c:if>
-    </div>
-
-    <div class="btn-area" style="margin-top: 40px;">
-        <button type="button" onclick="location.href='tpo.do'" 
-                style="background-color: #ff7f50; color: white; padding: 15px 40px; font-size: 1.3em; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            👗 AI 코디 추천받기
-        </button>
-    </div>
-</div>
+                </div>
+            </c:if>
+        </div>

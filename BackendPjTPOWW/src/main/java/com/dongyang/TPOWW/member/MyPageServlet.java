@@ -18,12 +18,16 @@ public class MyPageServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
+
         HttpSession session = request.getSession();
         UserDTO udto = (UserDTO) session.getAttribute("udto");
 
         // 로그인 안 되어 있으면 index로 보내기
         if (udto == null) {
-            response.sendRedirect("index.jsp");
+            request.setAttribute("errorMsg", "로그인이 필요한 서비스입니다.");
+            request.getRequestDispatcher("/index.jsp").forward(request, response);
             return;
         }
 
@@ -33,9 +37,14 @@ public class MyPageServlet extends HttpServlet {
         UserPrefDAO pdao = new UserPrefDAO();
         UserPrefDTO pdto = pdao.getUserPref(un);
 
+        // TPO History 가져오기 (최신순)
+        com.dongyang.TPOWW.tpo.TpoHistoryDAO hdao = new com.dongyang.TPOWW.tpo.TpoHistoryDAO();
+        java.util.List<com.dongyang.TPOWW.tpo.TpoHistoryDTO> historyList = hdao.getHistoryByUn(un);
+
         // request에 담아서 JSP로 보내기
         request.setAttribute("udto", udto);
         request.setAttribute("pdto", pdto);
+        request.setAttribute("historyList", historyList);
 
         request.getRequestDispatcher("/member/mypage.jsp").forward(request, response);
     }
@@ -46,6 +55,7 @@ public class MyPageServlet extends HttpServlet {
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
 
         HttpSession session = request.getSession();
         UserDTO sessionUser = (UserDTO) session.getAttribute("udto");
@@ -81,10 +91,12 @@ public class MyPageServlet extends HttpServlet {
         udto.setGender(gender);
         udto.setRegion(region);
         udto.setSigungu(sigungu);
+        // Fix: Preserve existing role from session
+        udto.setRole(sessionUser.getRole());
 
         UserDAO udao = new UserDAO();
         int r = udao.updateUser(udto);
-        System.out.println("수정 결과 = "+ r);
+        System.out.println("수정 결과 = " + r);
 
         // UserPref 수정 DTO
         UserPrefDTO pdto = new UserPrefDTO();

@@ -1,0 +1,462 @@
+@import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
+/* =========================================
+   1. Global Reset & Body
+   ========================================= */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Jua', sans-serif;
+    /* Background Image: Full screen, fixed */
+    background: url('../images/bg_cartoon.png') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* =========================================
+   2. Layout & Containers
+   ========================================= */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    /* Removed top margin to let header sit on top */
+    padding: 20px;
+    text-align: center;
+}
+
+/* Width Modifiers */
+.w-600 {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.w-800 {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.w-1000 {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* =========================================
+   3. Header
+   ========================================= */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    /* Transparent background as per new design */
+    background: transparent;
+    position: relative;
+    z-index: 1000;
+}
+
+.logo a {
+    font-size: 3em;
+    /* Larger logo */
+    font-weight: bold;
+    color: #333;
+    text-shadow: none;
+    /* Clean text */
+    letter-spacing: -1px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Header Inputs: White, Rounded, No Border */
+.header-input {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    /* Slightly rounded corners */
+    font-family: 'Jua', sans-serif;
+    font-size: 1em;
+    outline: none;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 150px;
+}
+
+.header-input::placeholder {
+    color: #aaa;
+}
+
+/* =========================================
+   4. Buttons
+   ========================================= */
+button,
+.btn-primary,
+.btn-secondary,
+.btn-tpo {
+    font-family: 'Jua', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+/* Login Button: Dark Blue */
+.btn-primary {
+    background: #4A6FA5;
+    /* Darker blue from image */
+    color: white;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 1em;
+    box-shadow: 0 4px 0 rgba(50, 80, 130, 0.3);
+    /* Hard shadow for cartoon feel */
+}
+
+.btn-primary:hover {
+    background: #5A7FB5;
+    transform: translateY(-2px);
+}
+
+/* Sign Up / Secondary: Light Blue Outline or Background */
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.3);
+    color: #333;
+    border: 2px solid #fff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 1em;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* TPO Recommendation Button: The Big Blue One */
+.btn-tpo {
+    background: #4A90E2;
+    /* Bright Blue */
+    color: white;
+    padding: 20px 60px;
+    font-size: 1.8em;
+    border-radius: 15px;
+    box-shadow: 0 6px 0 #357ABD;
+    /* 3D effect */
+    margin-top: 30px;
+    width: auto;
+    min-width: 300px;
+}
+
+.btn-tpo:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 0 #357ABD;
+}
+
+.btn-tpo.large {
+    width: 100%;
+    padding: 20px;
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.button-group.center {
+    justify-content: center;
+}
+
+/* =========================================
+   5. Main Page (Weather Display)
+   ========================================= */
+/* Floating directly on sky, NO background card */
+.current-weather-display {
+    background: transparent;
+    padding: 50px 0;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.current-weather-display h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.big-icon {
+    font-size: 10em;
+    /* Very large icon */
+    margin: 10px 0;
+    /* No animation on the icon itself in the static image, but we can keep a subtle float */
+    animation: float 4s ease-in-out infinite;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+}
+
+.big-temp {
+    font-size: 6em;
+    font-weight: bold;
+    color: #333;
+    line-height: 1;
+    margin-bottom: 10px;
+}
+
+.weather-desc {
+    font-size: 1.5em;
+    color: #555;
+    margin-bottom: 40px;
+}
+
+/* Forecast: Horizontal list, transparent or minimal */
+.forecast-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 50px;
+}
+
+.daily-card {
+    background: rgba(255, 255, 255, 0.4);
+    /* Very subtle background */
+    padding: 15px;
+    border-radius: 15px;
+    width: 120px;
+    text-align: center;
+    backdrop-filter: blur(5px);
+}
+
+.daily-day {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.weather-icon {
+    font-size: 2.5em;
+    margin: 5px 0;
+}
+
+/* =========================================
+   6. Sub-pages (Forms & Content)
+   ========================================= */
+/* For forms and lists, we STILL need a background for readability */
+.content-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 30px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+    text-align: left;
+    /* Reset text align for forms */
+}
+
+.cartoon-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 1.1em;
+    color: #555;
+    margin-left: 5px;
+}
+
+.form-input {
+    padding: 15px;
+    border: 2px solid #eee;
+    border-radius: 15px;
+    font-family: 'Jua', sans-serif;
+    font-size: 1em;
+    outline: none;
+    background: #fff;
+    width: 100%;
+}
+
+.form-input:focus {
+    border-color: #4A90E2;
+}
+
+.form-input.readonly {
+    background: #f9f9f9;
+    color: #888;
+}
+
+/* Radio/Checkbox Groups */
+.radio-group,
+.checkbox-group {
+    display: flex;
+    gap: 20px;
+    background: #f0f4f8;
+    padding: 15px;
+    border-radius: 15px;
+}
+
+/* =========================================
+   7. Tables (Admin, History)
+   ========================================= */
+.cartoon-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.cartoon-table th {
+    background: #4A90E2;
+    color: white;
+    padding: 15px;
+    font-weight: normal;
+}
+
+.cartoon-table td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+}
+
+/* =========================================
+   8. Footer
+   ========================================= */
+footer {
+    text-align: center;
+    padding: 20px;
+    /* Transparent footer */
+    background: transparent;
+    margin-top: 50px;
+    font-size: 0.9em;
+    color: #fff;
+    /* White text on blue bottom part of image */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* =========================================
+   9. Utilities & Animations
+   ========================================= */
+.text-center {
+    text-align: center;
+}
+
+.mb-10 {
+    margin-bottom: 10px;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+.mb-30 {
+    margin-bottom: 30px;
+}
+
+.mt-10 {
+    margin-top: 10px;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+.mt-30 {
+    margin-top: 30px;
+}
+
+.mt-40 {
+    margin-top: 40px;
+}
+
+.color-gray {
+    color: #666;
+}
+
+.dashed-bottom {
+    border-bottom: 2px dashed #ddd;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.dashed-line {
+    border: none;
+    border-top: 2px dashed #ddd;
+    margin: 30px 0;
+}
+
+.spacer-600 {
+    height: 600px;
+}
+
+.list-none {
+    list-style: none;
+}
+
+/* TPO Result Box */
+.result-box {
+    background: #fff;
+    padding: 30px;
+    border-radius: 25px;
+    border: 3px solid #e0e0e0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    white-space: pre-wrap;
+    line-height: 1.8;
+    font-size: 1.1em;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header-input {
+        width: 100px;
+    }
+
+    .big-temp {
+        font-size: 4em;
+    }
+
+    .big-icon {
+        font-size: 6em;
+    }
+}

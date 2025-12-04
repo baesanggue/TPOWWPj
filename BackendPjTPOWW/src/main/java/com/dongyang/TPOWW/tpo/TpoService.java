@@ -16,7 +16,7 @@ public class TpoService {
     }
 
     public TpoResult recommend(TpoRequest req) throws IOException {
-    	// [수정] 서블릿에서 만들어준 날씨 문자열을 그대로 가져옵니다.
+        // [수정] 서블릿에서 만들어준 날씨 문자열을 그대로 가져옵니다.
         String weatherSummary = req.getWeatherInfo();
         if (weatherSummary == null || weatherSummary.isEmpty()) {
             weatherSummary = "날씨 정보 없음";
@@ -49,7 +49,7 @@ public class TpoService {
         sb.append("- 날짜/시간: ").append(r.getDate()).append(" ").append(r.getTime()).append("\n");
         sb.append("- 활동(무엇을): ").append(nullTo(r.getWhat(), "활동 정보 없음")).append("\n");
         sb.append("- 장소(어디서): ").append(nullTo(r.getRegion(), "지역 미상"))
-          .append(" ").append(nullTo(r.getSigungu(), "")).append("\n");
+                .append(" ").append(nullTo(r.getSigungu(), "")).append("\n");
 
         sb.append("- 실내/야외: ");
         if (r.isIndoor() && r.isOutdoor()) {
@@ -71,8 +71,8 @@ public class TpoService {
         sb.append("- 퍼스널 컬러: ").append(emptyTo(r.getPcolor(), "정보 없음")).append("\n");
 
         sb.append("\n## 요구사항\n");
-        sb.append("날씨와 TPO에 맞춰 다음 항목별로 한국어로 자세히 추천해줘.\n");
-        sb.append("각 항목은 구체적인 아이템 이름(예: 흰색 오버핏 셔츠, 검은 슬랙스, 베이지 트렌치코트 등)과 스타일 설명을 적어줘.\n\n");
+        sb.append("날씨와 TPO에 맞춰 다음 항목별로 한국어로 **간결하게 핵심만** 추천해줘.\n");
+        sb.append("긴 설명은 생략하고, 구체적인 아이템 위주로 짧게 답변해줘.\n\n");
         sb.append("- 모자:\n");
         sb.append("- 액세서리:\n");
         sb.append("- 상의:\n");
@@ -80,9 +80,8 @@ public class TpoService {
         sb.append("- 양말:\n");
         sb.append("- 신발:\n");
         sb.append("- 기타(아우터, 가방 등):\n\n");
-        sb.append("특히 날씨(기온, 강수, 바람)를 잘 반영해서, ");
-        sb.append("너무 춥거나 덥지 않도록 보온과 통풍을 균형 있게 고려해줘.\n");
-        sb.append("답변은 위 항목 이름과 콜론(:) 형식을 그대로 사용해줘.");
+        sb.append("답변은 위 항목 이름과 콜론(:) 형식을 그대로 사용하고, 불필요한 서술은 하지 마.\n");
+        sb.append("각 줄의 시작에 공백이나 들여쓰기를 절대 하지 마.");
 
         return sb.toString();
     }
@@ -92,7 +91,8 @@ public class TpoService {
     }
 
     private String emptyTo(String v, String alt) {
-        if (v == null || v.trim().isEmpty()) return alt;
+        if (v == null || v.trim().isEmpty())
+            return alt;
         return v;
     }
 }
