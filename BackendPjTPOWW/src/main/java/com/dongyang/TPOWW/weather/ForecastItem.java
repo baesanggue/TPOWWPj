@@ -1,5 +1,6 @@
 package com.dongyang.TPOWW.weather;
 
+
 public class ForecastItem {
     private String fcstDate;
     private String fcstTime;
@@ -17,4 +18,10 @@ public class ForecastItem {
     public String getFcstTime() { return fcstTime; }
     public String getCategory() { return category; }
     public String getFcstValue() { return fcstValue; }
+
+    // 🔥 추가해야 하는 부분
+    public String getKey() {
+        return fcstDate + fcstTime;
+    }
 }
+

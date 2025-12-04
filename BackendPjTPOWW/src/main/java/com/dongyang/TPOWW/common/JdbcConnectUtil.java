@@ -7,7 +7,7 @@ public class JdbcConnectUtil {
 		Connection con = null;
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			con = DriverManager.getConnection("jdbc:mysql://localhost:3306/tpoww", "root", "dongyang");
+			con = DriverManager.getConnection("jdbc:mysql://localhost:3306/tpoww", "root", "1203");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} catch (SQLException e) {

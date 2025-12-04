@@ -23,7 +23,7 @@
         <h2>현재 날씨</h2>
         
         <c:choose>
-            <c:when test="${not empty t1h}">
+            <c:when test="${not empty t1h and t1h != '-'}">
                 <div style="font-size: 1.2em; margin: 15px 0;">
                     <span style="margin: 0 15px;">기온: <strong>${t1h}℃</strong></span>
                     <span style="margin: 0 15px;">습도: <strong>${reh}%</strong></span>
@@ -32,34 +32,34 @@
                 </div>
             </c:when>
             <c:otherwise>
-                <p>날씨 정보를 불러오는 중입니다... <a href="weather">새로고침</a></p>
+                <p>날씨 정보를 불러오는 중입니다... <a href="weather.do">새로고침</a></p>
             </c:otherwise>
         </c:choose>
 
         <hr style="margin: 20px 0; border-top: 1px solid #ddd;">
 
-        <h3>단기 예보</h3>
-        <c:if test="${not empty forecastList}">
-            <table border="1" style="margin: 0 auto; width: 90%; border-collapse: collapse; text-align: center; background-color: white;">
+        <h3>단기 예보 (오전/오후)</h3>
+        <c:if test="${not empty dailyList}">
+            <table border="1" style="margin: 0 auto; width: 70%; border-collapse: collapse; text-align: center; background-color: white;">
                 <thead style="background-color: #e6e6fa;">
                     <tr>
                         <th style="padding: 8px;">날짜</th>
-                        <th style="padding: 8px;">시간</th>
-                        <th style="padding: 8px;">항목</th>
-                        <th style="padding: 8px;">예보값</th>
+                        <th style="padding: 8px;">오전 기온</th>
+                        <th style="padding: 8px;">오후 기온</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <c:forEach var="item" items="${forecastList}" end="5">
+                    <c:forEach var="entry" items="${dailyList}">
                         <tr>
-                            <td style="padding: 8px;">${item.fcstDate}</td>
-                            <td style="padding: 8px;">${item.fcstTime}</td>
-                            <td style="padding: 8px;">${item.category}</td>
+                            <td style="padding: 8px;">${entry.key}</td>
                             <td style="padding: 8px;">
-                                ${item.fcstValue}
-                                <c:if test="${item.category eq 'TMP'}">℃</c:if>
-                                <c:if test="${item.category eq 'REH'}">%</c:if>
+                                <c:out value="${entry.value['morningTemp'] != null ? entry.value['morningTemp'] : '-'}" /> ℃
                             </td>
+                            
+                            <td style="padding: 8px;">
+                                <c:out value="${entry.value['afternoonTemp'] != null ? entry.value['afternoonTemp'] : '-'}" /> ℃
+                            </td>
+                            
                         </tr>
                     </c:forEach>
                 </tbody>

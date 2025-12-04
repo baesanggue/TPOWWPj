@@ -313,4 +313,28 @@ public class LocationCoord {
     public static Point getCoordinate(String region, String sigungu) {
         return coordMap.getOrDefault(region + "_" + sigungu, new Point("60", "127")); // 기본값: 서울
     }
+    public static String getMidCode(String region, String sigungu) {
+        switch(region) {
+            case "Seoul": return "11B10101";
+            case "Busan": return "11H20201";
+            case "Daegu": return "11H10701";
+            case "Incheon": return "11B20201";
+            case "Gwangju": return "11F20501";
+            case "Daejeon": return "11C20401";
+            case "Ulsan": return "11H20101";
+            case "Sejong": return "11C20301";
+            case "Gyeonggi": return "11B00000";
+            case "Gangwon": return "11D00000";
+            case "Chungbuk": return "11C10000";
+            case "Chungnam": return "11C20000";
+            case "Jeonbuk": return "11F10000";
+            case "Jeonnam": return "11F20000";
+            case "Gyeongbuk": return "11H10000";
+            case "Gyeongnam": return "11H20000";
+            case "Jeju": return "11G00000";
+            default: return "11B10101"; // 기본값 서울
+        }
+    }
+    
+
 }

@@ -5,14 +5,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.Map;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,163 +19,255 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
+
 import com.dongyang.TPOWW.member.UserDTO;
 import com.dongyang.TPOWW.weather.LocationCoord.Point;
 
 @WebServlet("/weather.do")
 public class WeatherServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    private static final String SERVICE_KEY = "3659dfdc17c8d704ea3b676ae54690c6df40cfa660853eb227dbe7bd57d50747";
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, java.io.IOException {
 
-        request.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html; charset=UTF-8");
-
-        HttpSession session = request.getSession();
-        UserDTO udto = (UserDTO) session.getAttribute("udto");
-
-        // 1. 기본값 설정 (로그인 안 했을 때: 서울 종로구)
-        String nx = "60";
+        // ===============================
+        // 0. 기본값 설정
+        // ===============================
+        String nx = "60";  // 서울
         String ny = "127";
-        String displayLocation = "서울특별시 (기본)";
+        String regionMidCode = "11B10101";
+        String displayRegion = "서울특별시";
 
-        // 2. 로그인 상태 체크 및 좌표 변경
-        if (udto != null) {
-            String region = udto.getRegion();   // 예: "Seoul"
-            String sigungu = udto.getSigungu(); // 예: "강남구"
-            
-            // LocationCoord 클래스를 이용해 좌표 찾기
-            Point pt = LocationCoord.getCoordinate(region, sigungu);
-            nx = pt.x;
-            ny = pt.y;
-            
-            // 화면에 보여줄 문구 ("서울특별시 강남구")
-            displayLocation = getKoreanRegionName(region) + " " + sigungu;
-        }
+        // ===============================
+        // 1. 로그인 체크 및 좌표 변경
+        // ===============================
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            UserDTO udto = (UserDTO) session.getAttribute("udto");
+            if (udto != null) {
+                String region = udto.getRegion();   // 예: "Seoul"
+                String sigungu = udto.getSigungu(); // 예: "강남구"
 
-        // 3. 세션에 정보 저장 (main.jsp 및 AI 추천에서 사용)
-        session.setAttribute("nx", nx);
-        session.setAttribute("ny", ny);
-        session.setAttribute("currentRegion", displayLocation);
+                // 좌표 변경
+                Point pt = LocationCoord.getCoordinate(region, sigungu);
+                if (pt != null) {
+                    nx = pt.x;
+                    ny = pt.y;
+                }
+                
+               
+                // 중기예보 지역 코드 변경
+                String midCode = LocationCoord.getMidCode(region, sigungu);
+                if (midCode != null) regionMidCode = midCode;
 
-        // 4. API 호출 준비
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-        String baseDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-
-        // ---------------- 현재 날씨 (초단기실황) ----------------
-        // buildUrl에 nx, ny를 전달합니다.
-        String ultraSrtNcstUrl = buildUrl("getUltraSrtNcst", baseDate, String.format("%02d00", now.getHour()), nx, ny);
-        try {
-            String jsonResponse = readUrl(ultraSrtNcstUrl);
-            session.setAttribute("t1h", extractValue(jsonResponse, "T1H"));
-            session.setAttribute("reh", extractValue(jsonResponse, "REH"));
-            session.setAttribute("rn1", extractValue(jsonResponse, "RN1"));
-            session.setAttribute("wsd", extractValue(jsonResponse, "WSD"));
-        } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("t1h", "-"); // 오류 시 대시(-) 표시
-        }
-
-        // --------------- 단기예보 (0500 + 1700) ---------------
-        try {
-            List<ForecastItem> forecast0500 = getForecast(baseDate, "0500", nx, ny);
-            List<ForecastItem> forecast1700 = getForecast(baseDate, "1700", nx, ny);
-
-            List<ForecastItem> merged = mergeForecast(forecast0500, forecast1700);
-            session.setAttribute("forecastList", merged);
-        } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("forecastList", new ArrayList<ForecastItem>());
-        }
-
-        response.sendRedirect("index.jsp");
-    }
-
-    // ---------------- 단기예보 요청 (nx, ny 파라미터 추가) ----------------
-    private List<ForecastItem> getForecast(String baseDate, String baseTime, String nx, String ny) throws Exception {
-        String url = buildUrl("getVilageFcst", baseDate, baseTime, nx, ny);
-        String json = readUrl(url);
-        return parseForecast(json);
-    }
-
-    // ---------------- URL 생성 (nx, ny 적용) ----------------
-    private String buildUrl(String apiType, String baseDate, String baseTime, String nx, String ny) throws java.io.UnsupportedEncodingException {
-        StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/" + apiType);
-        // 서비스키는 본인 키로 꼭 확인하세요!
-        urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=3659dfdc17c8d704ea3b676ae54690c6df40cfa660853eb227dbe7bd57d50747");
-        urlBuilder.append("&" + URLEncoder.encode("pageNo", "UTF-8") + "=1");
-        urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=1000");
-        urlBuilder.append("&" + URLEncoder.encode("dataType", "UTF-8") + "=JSON");
-        urlBuilder.append("&" + URLEncoder.encode("base_date", "UTF-8") + "=" + URLEncoder.encode(baseDate, "UTF-8"));
-        urlBuilder.append("&" + URLEncoder.encode("base_time", "UTF-8") + "=" + URLEncoder.encode(baseTime, "UTF-8"));
-        
-        // [중요] 고정값 55, 127을 지우고 변수 nx, ny를 넣습니다.
-        urlBuilder.append("&" + URLEncoder.encode("nx", "UTF-8") + "=" + URLEncoder.encode(nx, "UTF-8"));
-        urlBuilder.append("&" + URLEncoder.encode("ny", "UTF-8") + "=" + URLEncoder.encode(ny, "UTF-8"));
-        
-        return urlBuilder.toString();
-    }
-
-    // ---------------- URL 읽기 (기존 동일) ----------------
-    private String readUrl(String apiUrl) throws Exception {
-        HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Content-type", "application/json");
-
-        BufferedReader rd;
-        if (conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) {
-            rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-        } else {
-            rd = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "UTF-8"));
-        }
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = rd.readLine()) != null) {
-            sb.append(line);
-        }
-        rd.close();
-        conn.disconnect();
-        return sb.toString();
-    }
-
-    // ---------------- 값 추출 (기존 동일) ----------------
-    private String extractValue(String json, String category) {
-        String pattern = "\\{[^}]*\"category\"\\s*:\\s*\"" + category + "\"[^}]*\"obsrValue\"\\s*:\\s*\"([^\"]+)\"[^}]*}";
-        Matcher m = Pattern.compile(pattern).matcher(json);
-        return m.find() ? m.group(1) : "-";
-    }
-
-    // ---------------- 파싱 (기존 동일) ----------------
-    private List<ForecastItem> parseForecast(String json) {
-        List<ForecastItem> list = new ArrayList<>();
-        Pattern itemArrayPattern = Pattern.compile("\"item\"\\s*:\\s*\\[(.*?)]", Pattern.DOTALL);
-        Matcher itemArrayMatcher = itemArrayPattern.matcher(json);
-        if (itemArrayMatcher.find()) {
-            String itemsContent = itemArrayMatcher.group(1);
-            Pattern itemPattern = Pattern.compile(
-                "\\{.*?\"category\"\\s*:\\s*\"(TMP|REH)\".*?"
-                        + "\"fcstDate\"\\s*:\\s*\"(\\d{8})\".*?"
-                        + "\"fcstTime\"\\s*:\\s*\"(\\d{4})\".*?"
-                        + "\"fcstValue\"\\s*:\\s*\"([^\"]+)\".*?}",
-                Pattern.DOTALL);
-            Matcher m = itemPattern.matcher(itemsContent);
-            while (m.find()) {
-                list.add(new ForecastItem(m.group(2), m.group(3), m.group(1), m.group(4)));
+                displayRegion = getKoreanRegionName(region) + " " + sigungu;
             }
         }
-        return list;
+
+        request.setAttribute("currentRegion", displayRegion);
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("yyyyMMdd");
+        String baseDate = now.format(dateFmt);
+
+        // 0~1시는 이전날 23시 기준
+        if (now.getHour() < 2) {
+            baseDate = now.minusDays(1).format(dateFmt);
+        }
+
+        // ===============================
+        // ① 현재날씨 (XML)
+        // ===============================
+        try {
+            String url = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst?"
+                    + "serviceKey=" + SERVICE_KEY
+                    + "&dataType=XML"
+                    + "&numOfRows=100"
+                    + "&pageNo=1"
+                    + "&base_date=" + baseDate
+                    + "&base_time=0200"
+                    + "&nx=" + nx + "&ny=" + ny;
+
+            Document doc = loadXML(url);
+            NodeList items = doc.getElementsByTagName("item");
+
+            String T1H = "-", REH = "-", RN1 = "-", WSD = "-";
+
+            for (int i = 0; i < items.getLength(); i++) {
+                Element e = (Element) items.item(i);
+
+                String category = getTag(e, "category");
+                String val = getTag(e, "obsrValue");
+
+                switch (category) {
+                    case "T1H": T1H = val; break;
+                    case "REH": REH = val; break;
+                    case "RN1": RN1 = val; break;
+                    case "WSD": WSD = val; break;
+                }
+            }
+
+            request.setAttribute("t1h", T1H);
+            request.setAttribute("reh", REH);
+            request.setAttribute("rn1", RN1);
+            request.setAttribute("wsd", WSD);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("t1h", "-");
+            request.setAttribute("reh", "-");
+            request.setAttribute("rn1", "-");
+            request.setAttribute("wsd", "-");
+        }
+
+        // ===============================
+        // ② 단기예보 (base_time=0500 기준)
+        // ===============================
+        Map<String, Map<String, Object>> dailyList = new LinkedHashMap<>();
+
+        try {
+            String shortUrl =
+                "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?"
+                + "serviceKey=" + SERVICE_KEY
+                + "&dataType=XML"
+                + "&numOfRows=2000"
+                + "&pageNo=1"
+                + "&base_date=" + baseDate
+                + "&base_time=0500"
+                + "&nx=" + nx + "&ny=" + ny;
+
+            Document doc = loadXML(shortUrl);
+            NodeList items = doc.getElementsByTagName("item");
+
+            Map<String, Map<String, String>> tempMap = new HashMap<>();
+
+            for (int i = 0; i < items.getLength(); i++) {
+                Element e = (Element) items.item(i);
+
+                String fcstDate = getTag(e, "fcstDate");
+                String fcstTime = getTag(e, "fcstTime");
+                String category = getTag(e, "category");
+                String fcstValue = getTag(e, "fcstValue");
+
+                if (!category.equals("TMP")) continue;
+
+                tempMap
+                    .computeIfAbsent(fcstDate, k -> new HashMap<>())
+                    .put(fcstTime, fcstValue);
+            }
+
+            for (int d = 0; d <= 3; d++) {
+                String keyDate = LocalDate.now()
+                        .plusDays(d)
+                        .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+                Map<String, Object> day = new HashMap<>();
+                Map<String, String> tmap = tempMap.get(keyDate);
+
+                if (tmap != null) {
+                    String morning = tmap.getOrDefault("0600", "-");
+                    String afternoon = tmap.getOrDefault("1500", "-");
+
+                    day.put("morningTemp", morning);
+                    day.put("afternoonTemp", afternoon);
+                } else {
+                    day.put("morningTemp", "-");
+                    day.put("afternoonTemp", "-");
+                }
+
+                dailyList.put(keyDate, day);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // ===============================
+        // ③ 중기예보
+        // ===============================
+        try {
+            LocalDateTime mid = LocalDateTime.now().withMinute(0).withSecond(0);
+            if (now.getHour() < 18) mid = mid.withHour(6);
+            else mid = mid.withHour(18);
+
+            String tmFc = mid.format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+
+            String midUrl =
+                "https://apis.data.go.kr/1360000/MidFcstInfoService/getMidTa?"
+                + "serviceKey=" + SERVICE_KEY
+                + "&dataType=XML"
+                + "&regId=" + regionMidCode
+                + "&tmFc=" + tmFc;
+
+            Document doc = loadXML(midUrl);
+            NodeList items = doc.getElementsByTagName("item");
+
+            if (items.getLength() > 0) {
+                Element e = (Element) items.item(0);
+
+                for (int i = 4; i <= 10; i++) {
+                    String key = LocalDate.now().plusDays(i)
+                            .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+                    String min = getTag(e, "taMin" + i, "-");
+                    String max = getTag(e, "taMax" + i, "-");
+
+                    Map<String, Object> day = new HashMap<>();
+                    day.put("morningTemp", min);
+                    day.put("afternoonTemp", max);
+
+                    dailyList.put(key, day);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        request.setAttribute("dailyList", dailyList);
+
+        request.getRequestDispatcher("index.jsp").forward(request, response);
     }
 
-    // ---------------- 병합 (기존 동일) ----------------
-    private List<ForecastItem> mergeForecast(List<ForecastItem> a, List<ForecastItem> b) {
-        LinkedHashMap<String, ForecastItem> map = new LinkedHashMap<>();
-        for (ForecastItem i : a) map.put(i.getFcstDate() + "_" + i.getFcstTime() + "_" + i.getCategory(), i);
-        for (ForecastItem i : b) map.putIfAbsent(i.getFcstDate() + "_" + i.getFcstTime() + "_" + i.getCategory(), i);
-        return new ArrayList<>(map.values());
+    // ===============================
+    // XML 로드 함수
+    // ===============================
+    private Document loadXML(String urlStr) throws Exception {
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+
+        return builder.parse(conn.getInputStream());
     }
 
-    // ---------------- [추가] 지역명 한글 변환 ----------------
+    // 태그값 가져오기
+    private String getTag(Element e, String tag) {
+        try {
+            return e.getElementsByTagName(tag).item(0).getTextContent();
+        } catch (Exception ex) {
+            return "-";
+        }
+    }
+
+    private String getTag(Element e, String tag, String def) {
+        try {
+            return e.getElementsByTagName(tag).item(0).getTextContent();
+        } catch (Exception ex) {
+            return def;
+        }
+    }
+
     private String getKoreanRegionName(String regionCode) {
         if (regionCode == null) return "";
         switch (regionCode) {
