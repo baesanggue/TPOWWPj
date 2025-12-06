@@ -196,7 +196,11 @@ public class TpoRecommendServlet extends HttpServlet {
 
         // 4. AI 서비스 호출
         TpoResult result = tpoService.recommend(req);
-
+        // 날짜/시간/활동/장소 정보 설정
+        result.setDate(whenDateStr);
+        result.setTime(request.getParameter("whenTime"));
+        result.setActivity(request.getParameter("what"));
+        result.setLocation(regionName);
         // 5. [추가] 히스토리 저장
         TpoHistoryDTO hDto = new TpoHistoryDTO();
         hDto.setUn(udto.getUn());

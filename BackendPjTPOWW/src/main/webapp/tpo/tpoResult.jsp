@@ -9,6 +9,7 @@
                 <meta charset="UTF-8">
                 <title>AI 코디 추천 결과</title>
                 <link rel="stylesheet" type="text/css" href="<c:url value='/css/cartoon_theme.css'/>">
+                <link rel="stylesheet" type="text/css" href="<c:url value='/css/custom_grid.css'/>">
             </head>
 
             <body>
@@ -26,34 +27,34 @@
                                     </div>
                                 </c:when>
                                 <c:otherwise>
-                                    <div class="mb-30">
-                                        <h3 class="dashed-bottom">
-                                            🌤️ 날씨 요약
-                                        </h3>
-                                        <p class="highlight-box" style="font-size: 1.1em; line-height: 1.6;">
-                                            ${tpoResult.weatherSummary}
-                                        </p>
+                                    <!-- 날짜/시간 -->
+                                    <div class="detail-section">
+                                        <h3>📅 날짜 및 시간</h3>
+                                        <p>${tpoResult.date} ${tpoResult.time}</p>
                                     </div>
-
-                                    <c:if test="${not empty tpoResult.reasonSummary}">
-                                        <div class="mb-30">
-                                            <h3 class="dashed-bottom">
-                                                💡 선택 이유 요약
-                                            </h3>
-                                            <div class="result-box"
-                                                style="text-align: left !important; white-space: pre-wrap;">
-                                                ${tpoResult.reasonSummary}
-                                            </div>
+                                    <!-- 활동 정보 -->
+                                    <div class="detail-section">
+                                        <h3>📍 활동 내용</h3>
+                                        <p>${tpoResult.activity}</p>
+                                    </div>
+                                    <!-- 날씨 정보 -->
+                                    <c:if test="${not empty tpoResult.weatherSummary}">
+                                        <div class="detail-section">
+                                            <h3>🌤️ 날씨 요약</h3>
+                                            <p>${tpoResult.weatherSummary}</p>
                                         </div>
                                     </c:if>
-
-                                    <div class="mb-30">
-                                        <h3 class="dashed-bottom">
-                                            🤖 AI의 추천
-                                        </h3>
-                                        <div class="result-box">
-                                            ${fn:trim(tpoResult.aiRecommend)}
+                                    <!-- 추천 이유 -->
+                                    <c:if test="${not empty tpoResult.reasonSummary}">
+                                        <div class="detail-section" style="background: #FFF9E6;">
+                                            <h3>💡 추천 이유</h3>
+                                            <div class="detail-content">${tpoResult.reasonSummary}</div>
                                         </div>
+                                    </c:if>
+                                    <!-- AI 추천 내용 -->
+                                    <div class="detail-section">
+                                        <h3>🤖 AI 추천 코디</h3>
+                                        <div class="detail-content">${fn:trim(tpoResult.aiRecommend)}</div>
                                     </div>
 
                                     <div class="button-group center mt-40">
