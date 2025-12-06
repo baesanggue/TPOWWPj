@@ -85,7 +85,7 @@ public class TpoRecommendServlet extends HttpServlet {
                 e.printStackTrace();
             }
         }
-        if (daysDiff > 2) { // 3일 후부터는 중기예보 사용
+        if (daysDiff >= 5 && daysDiff <= 12) { // 중기예보는 3~10일만
             String midLandJson = (String) session.getAttribute("midLandJson");
             String midTaJson = (String) session.getAttribute("midTaJson");
             weatherInfo.append(daysDiff).append("일 후 예상 날씨: ");
@@ -106,6 +106,8 @@ public class TpoRecommendServlet extends HttpServlet {
                 String tempMaxKey = "taMax" + targetDay;
                 String minTemp = extractJsonValue(midTaJson, tempKey);
                 String maxTemp = extractJsonValue(midTaJson, tempMaxKey);
+                System.out.println("[DEBUG] tempKey: " + tempKey + ", minTemp: " + minTemp);
+                System.out.println("[DEBUG] tempMaxKey: " + tempMaxKey + ", maxTemp: " + maxTemp);
                 if (minTemp != null && maxTemp != null) {
                     weatherInfo.append("최저 ").append(minTemp).append("°C, ");
                     weatherInfo.append("최고 ").append(maxTemp).append("°C");
@@ -113,17 +115,42 @@ public class TpoRecommendServlet extends HttpServlet {
                 }
             }
 
-            // 중기 육상 예보 파싱
+            // Line 117 근처, 중기 육상 예보 파싱 부분
             if (midLandJson != null && !midLandJson.isEmpty()) {
                 int targetDay = (int) daysDiff;
-                String wfKey = "wf" + targetDay + "Am";
-                String wf = extractJsonValue(midLandJson, wfKey);
-                if (wf != null && !wf.isEmpty()) {
-                    if (foundData) {
-                        weatherInfo.append(". ");
+                // 8일 이후는 날씨/강수확률 데이터가 없음
+                if (targetDay <= 7) {
+                    // 오전/오후 날씨
+                    String wfAmKey = "wf" + targetDay + "Am";
+                    String wfPmKey = "wf" + targetDay + "Pm";
+                    String wfAm = extractJsonValue(midLandJson, wfAmKey);
+                    String wfPm = extractJsonValue(midLandJson, wfPmKey);
+                    // 강수확률
+                    String rnStKey = "rnSt" + targetDay + "Am";
+                    String rnSt = extractJsonValue(midLandJson, rnStKey);
+                    if (wfAm != null && !wfAm.isEmpty()) {
+                        if (foundData) {
+                            weatherInfo.append(", ");
+                        }
+                        weatherInfo.append("날씨: ").append(wfAm);
+
+                        if (wfPm != null && !wfPm.isEmpty()) {
+                            weatherInfo.append(" / ").append(wfPm);
+                        }
+                        foundData = true;
                     }
-                    weatherInfo.append("날씨: ").append(wf);
-                    foundData = true;
+                    if (rnSt != null && !rnSt.isEmpty()) {
+                        if (foundData) {
+                            weatherInfo.append(", ");
+                        }
+                        weatherInfo.append("강수확률: ").append(rnSt).append("%");
+                        foundData = true;
+                    }
+                } else {
+                    // 8일 이후는 날씨/강수확률 정보 없음
+                    if (foundData) {
+                        weatherInfo.append(" (8일 이후는 날씨/강수확률 정보가 제공되지 않습니다)");
+                    }
                 }
             }
 
@@ -132,29 +159,87 @@ public class TpoRecommendServlet extends HttpServlet {
             }
         } else {
             // 3일 이내: 단기예보 사용
+            System.out.println("=== 단기예보 경로 진입 ===");
+            System.out.println("whenDateStr: " + whenDateStr);
+            System.out.println(
+                    "forecastList: " + (forecastList != null ? "존재 (크기: " + forecastList.size() + ")" : "null"));
+            System.out.println("=========================");
+
             if (whenDateStr != null && forecastList != null && !forecastList.isEmpty()) {
                 try {
                     LocalDate targetDate = LocalDate.parse(whenDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                     String targetDateStr = targetDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-
+                    String targetPty = null, targetSky = null, targetPop = null, targetWsd = null;
                     String minTemp = null, maxTemp = null;
+
+                    // 디버그: forecastList 데이터 확인
+                    System.out.println("=== 단기예보 날씨 정보 추출 디버그 ===");
+                    System.out.println("대상 날짜: " + targetDateStr);
+                    System.out.println("forecastList 크기: " + forecastList.size());
+
                     for (ForecastItem item : forecastList) {
-                        if (item.getFcstDate().equals(targetDateStr) && "TMP".equals(item.getCategory())) {
-                            int temp = Integer.parseInt(item.getFcstValue());
-                            if (minTemp == null || temp < Integer.parseInt(minTemp)) {
-                                minTemp = item.getFcstValue();
-                            }
-                            if (maxTemp == null || temp > Integer.parseInt(maxTemp)) {
-                                maxTemp = item.getFcstValue();
+                        if (item.getFcstDate().equals(targetDateStr)) { // 이미 사용자 입력 날짜 필터링 중! ✅
+                            String category = item.getCategory();
+                            String value = item.getFcstValue();
+
+                            // 디버그: 카테고리별 데이터 출력
+                            System.out.println("카테고리: " + category + ", 값: " + value);
+
+                            if ("TMP".equals(category)) {
+                                int temp = Integer.parseInt(value);
+                                if (minTemp == null || temp < Integer.parseInt(minTemp))
+                                    minTemp = value;
+                                if (maxTemp == null || temp > Integer.parseInt(maxTemp))
+                                    maxTemp = value;
+                            } else if ("PTY".equals(category) && targetPty == null) {
+                                targetPty = value;
+                            } else if ("SKY".equals(category) && targetSky == null) {
+                                targetSky = value;
+                            } else if ("POP".equals(category) && targetPop == null) {
+                                targetPop = value;
+                            } else if ("WSD".equals(category) && targetWsd == null) {
+                                targetWsd = value;
                             }
                         }
                     }
+
+                    // 디버그: 추출된 값 확인
+                    System.out.println("추출 결과:");
+                    System.out.println("  minTemp: " + minTemp);
+                    System.out.println("  maxTemp: " + maxTemp);
+                    System.out.println("  PTY: " + targetPty);
+                    System.out.println("  SKY: " + targetSky);
+                    System.out.println("  POP: " + targetPop);
+                    System.out.println("  WSD: " + targetWsd);
 
                     weatherInfo.append(daysDiff).append("일 후: 최저 ")
                             .append(minTemp != null ? minTemp : "-")
                             .append("°C, 최고 ")
                             .append(maxTemp != null ? maxTemp : "-")
                             .append("°C");
+                    // 강수형태
+                    if (targetPty != null && !targetPty.equals("0")) {
+                        weatherInfo.append(", ").append(getPtyText(targetPty));
+                    }
+                    // 하늘상태
+                    if (targetSky != null) {
+                        String skyText = getSkyText(targetSky);
+                        if (!skyText.isEmpty()) {
+                            weatherInfo.append(", ").append(skyText);
+                        }
+                    }
+                    // 강수확률
+                    if (targetPop != null) {
+                        weatherInfo.append(", 강수확률 ").append(targetPop).append("%");
+                    }
+                    // 풍속
+                    if (targetWsd != null) {
+                        weatherInfo.append(", 바람 ").append(targetWsd).append("m/s");
+                    }
+
+                    // 디버그: 최종 weatherInfo 출력
+                    System.out.println("최종 weatherInfo: " + weatherInfo.toString());
+                    System.out.println("=====================================");
                 } catch (Exception e) {
                     weatherInfo.append("날씨 정보 없음");
                 }
@@ -259,13 +344,17 @@ public class TpoRecommendServlet extends HttpServlet {
         if (jsonString == null || key == null) {
             return null;
         }
+        // 디버깅 로그 추가
+        System.out.println("[extractJsonValue] 검색 키: " + key);
         // "key": 패턴 찾기 (공백 고려)
-        String searchPattern = "\"" + key + "\"";
+        String searchPattern = "\"" + key + "\":";
         int keyIndex = jsonString.indexOf(searchPattern);
 
         if (keyIndex == -1) {
             return null;
         }
+        // 디버깅 로그 추가
+        System.out.println("[extractJsonValue] 검색 키: " + key);
 
         // 콜론 위치 찾기
         int colonIndex = jsonString.indexOf(":", keyIndex);
@@ -305,6 +394,46 @@ public class TpoRecommendServlet extends HttpServlet {
                 valueEnd++;
             }
             return jsonString.substring(valueStart, valueEnd).trim();
+        }
+    }
+
+    /**
+     * 강수형태 코드를 텍스트로 변환
+     */
+    private String getPtyText(String pty) {
+        switch (pty) {
+            case "1":
+                return "비";
+            case "2":
+                return "비/눈";
+            case "3":
+                return "눈";
+            case "4":
+                return "소나기";
+            case "5":
+                return "빗방울";
+            case "6":
+                return "빗방울/눈날림";
+            case "7":
+                return "눈날림";
+            default:
+                return "강수없음";
+        }
+    }
+
+    /**
+     * 하늘상태 코드를 텍스트로 변환
+     */
+    private String getSkyText(String sky) {
+        switch (sky) {
+            case "1":
+                return "맑음";
+            case "3":
+                return "구름많음";
+            case "4":
+                return "흐림";
+            default:
+                return "";
         }
     }
 }

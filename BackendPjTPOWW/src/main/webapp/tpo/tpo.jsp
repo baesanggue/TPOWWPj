@@ -106,6 +106,10 @@
                             </c:forEach>
                         </select>
                     </div>
+                    <p class="form-hint">
+                        ※ 오늘부터 최대 12일 후까지 선택 가능합니다.<br>
+                        &nbsp;&nbsp;&nbsp;(7일 이후는 기온 정보만 제공되며, 날씨 및 강수확률은 제공되지 않습니다)
+                    </p>
                 </div>
 
                 <!-- 6. 무엇을 -->
@@ -153,6 +157,46 @@
                 <%@ include file="../footer.jsp" %>
 
                     <script src="${pageContext.request.contextPath}/js/region.js"></script>
+                    <!-- 날짜 입력 제한 스크립트 -->
+                    <script>
+                        // 날짜 입력 제한: 오늘부터 10일 후까지
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const dateInput = document.getElementById('whenDate');
+                            if (dateInput) {
+                                const today = new Date();
+                                const maxDate = new Date();
+                                maxDate.setDate(today.getDate() + 10);
+
+                                dateInput.min = today.toISOString().split('T')[0];
+                                dateInput.max = maxDate.toISOString().split('T')[0];
+
+                                if (!dateInput.value) {
+                                    dateInput.value = today.toISOString().split('T')[0];
+                                }
+                            }
+                        });
+                    </script>
+
+                    <script>
+                        // 날짜 입력 제한: 오늘부터 12일 후까지
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const dateInput = document.getElementById('whenDate');
+                            if (dateInput) {
+                                const today = new Date();
+                                const maxDate = new Date();
+                                maxDate.setDate(today.getDate() + 12);
+
+                                dateInput.min = today.toISOString().split('T')[0];
+                                dateInput.max = maxDate.toISOString().split('T')[0];
+
+                                if (!dateInput.value) {
+                                    dateInput.value = today.toISOString().split('T')[0];
+                                }
+                            }
+                        });
+                    </script>
+
+                    <!-- 지역 선택 처리 스크립트 -->
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
                             // Region pre-selection

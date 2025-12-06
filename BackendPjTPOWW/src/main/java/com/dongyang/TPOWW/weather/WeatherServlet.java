@@ -294,7 +294,7 @@ public class WeatherServlet extends HttpServlet {
         if (itemArrayMatcher.find()) {
             String itemsContent = itemArrayMatcher.group(1);
             Pattern itemPattern = Pattern.compile(
-                    "\\{.*?\"category\"\\s*:\\s*\"(TMP|REH)\".*?"
+                    "\\{.*?\"category\"\\s*:\\s*\"([^\"]+)\".*?"
                             + "\"fcstDate\"\\s*:\\s*\"(\\d{8})\".*?"
                             + "\"fcstTime\"\\s*:\\s*\"(\\d{4})\".*?"
                             + "\"fcstValue\"\\s*:\\s*\"([^\"]+)\".*?}",
@@ -467,6 +467,10 @@ public class WeatherServlet extends HttpServlet {
                 } else if (maxSky == 4) {
                     state = "cloudy";
                     desc = "흐림";
+                } else {
+                    // 기본값 (maxSky == 1 또는 알 수 없는 경우)
+                    state = "sunny";
+                    desc = "맑음";
                 }
             }
 
