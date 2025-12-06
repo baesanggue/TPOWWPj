@@ -112,33 +112,56 @@ public class WeatherServlet extends HttpServlet {
         try {
             String ultraSrtNcstUrl = buildUrl("getUltraSrtNcst", liveBaseDate, liveBaseTime, nx, ny);
             String jsonResponse = readUrl(ultraSrtNcstUrl);
-
             String t1h = extractValue(jsonResponse, "T1H");
-
             if ("-".equals(t1h)) {
                 throw new Exception("Weather API returned empty data");
             }
-
             session.setAttribute("t1h", t1h);
             session.setAttribute("reh", extractValue(jsonResponse, "REH"));
             session.setAttribute("rn1", extractValue(jsonResponse, "RN1"));
             session.setAttribute("wsd", extractValue(jsonResponse, "WSD"));
-            session.setAttribute("pty", extractValue(jsonResponse, "PTY"));
-            session.removeAttribute("weatherError"); // 성공 시 에러 삭제
+            session.setAttribute("PTY", extractValue(jsonResponse, "PTY"));
+
+            // SKY는 초단기예보에서 가져오기
+            String fcstUrl = buildUrl("getUltraSrtFcst", liveBaseDate, liveBaseTime, nx, ny);
+            String fcstJson = readUrl(fcstUrl);
+            String skyValue = extractFcstValue(fcstJson, "SKY");
+            session.setAttribute("SKY", skyValue);
+
+            System.out.println("=== 날씨 디버그 ===");
+            System.out.println("PTY: " + extractValue(jsonResponse, "PTY"));
+            System.out.println("SKY: " + skyValue);
+            System.out.println("==================");
+
+            session.removeAttribute("weatherError");
         } catch (Exception e) {
             e.printStackTrace();
             session.setAttribute("t1h", "-");
-            session.setAttribute("pty", "0");
+            session.setAttribute("PTY", "0");
+            session.setAttribute("SKY", "-");
             session.setAttribute("weatherError", "기상청 정보를 불러올 수 없습니다.");
         }
 
         // --------------- 단기예보 (최근 발표 기준) ---------------
         try {
-            // 단기예보는 3일치 데이터를 한 번에 줍니다 (numOfRows=1000이면 충분)
-            List<ForecastItem> forecastList = getForecast(fcstBaseDate, fcstBaseTime, nx, ny);
+            String fcstUrl = buildUrl("getVilageFcst", fcstBaseDate, fcstBaseTime, nx, ny);
+            String fcstJson = readUrl(fcstUrl);
 
+            // 디버그: API 응답 일부 출력
+            System.out.println("=== 단기예보 API 응답 (처음 500자) ===");
+            System.out.println(fcstJson.substring(0, Math.min(500, fcstJson.length())));
+            System.out.println("========================================");
+
+            // 현재 시각의 POP 찾기
+            String currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String currentTime = String.format("%02d00", now.getHour());
+
+            String popValue = extractFcstValueByTime(fcstJson, "POP", currentDate, currentTime);
+            session.setAttribute("POP", popValue);
+            System.out.println("POP(강수확률): " + popValue + "%");
+
+            List<ForecastItem> forecastList = parseForecast(fcstJson);
             session.setAttribute("forecastList", forecastList);
-
             // 3일치 요약 정보 생성
             if (forecastList != null && !forecastList.isEmpty()) {
                 List<DailyWeatherDTO> threeDayForecast = processDailyWeather(forecastList);
@@ -196,6 +219,7 @@ public class WeatherServlet extends HttpServlet {
         urlBuilder.append("&" + URLEncoder.encode("pageNo", "UTF-8") + "=1");
         urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=1000");
         urlBuilder.append("&" + URLEncoder.encode("dataType", "UTF-8") + "=JSON");
+
         urlBuilder.append("&" + URLEncoder.encode("base_date", "UTF-8") + "=" + URLEncoder.encode(baseDate, "UTF-8"));
         urlBuilder.append("&" + URLEncoder.encode("base_time", "UTF-8") + "=" + URLEncoder.encode(baseTime, "UTF-8"));
         urlBuilder.append("&" + URLEncoder.encode("nx", "UTF-8") + "=" + URLEncoder.encode(nx, "UTF-8"));
@@ -227,10 +251,37 @@ public class WeatherServlet extends HttpServlet {
         return sb.toString();
     }
 
+    // ---------------- 시간별 예보 값 추출 ----------------
+    private String extractFcstValueByTime(String json, String category, String fcstDate, String fcstTime) {
+        // 특정 날짜/시간의 값을 찾음
+        String pattern = "\\{[^}]*\"category\"\\s*:\\s*\"" + category + "\""
+                + "[^}]*\"fcstDate\"\\s*:\\s*\"" + fcstDate + "\""
+                + "[^}]*\"fcstTime\"\\s*:\\s*\"" + fcstTime + "\""
+                + "[^}]*\"fcstValue\"\\s*:\\s*\"([^\"]+)\"[^}]*}";
+        Matcher m = Pattern.compile(pattern).matcher(json);
+        if (m.find()) {
+            return m.group(1);
+        }
+
+        // 못 찾으면 첫 번째 POP 값이라도 반환
+        String simplePattern = "\\{[^}]*\"category\"\\s*:\\s*\"" + category + "\""
+                + "[^}]*\"fcstValue\"\\s*:\\s*\"([^\"]+)\"[^}]*}";
+        Matcher m2 = Pattern.compile(simplePattern).matcher(json);
+        return m2.find() ? m2.group(1) : "-";
+    }
+
     // ---------------- 값 추출 ----------------
     private String extractValue(String json, String category) {
         String pattern = "\\{[^}]*\"category\"\\s*:\\s*\"" + category
                 + "\"[^}]*\"obsrValue\"\\s*:\\s*\"([^\"]+)\"[^}]*}";
+        Matcher m = Pattern.compile(pattern).matcher(json);
+        return m.find() ? m.group(1) : "-";
+    }
+
+    // ---------------- 예보 값 추출 (fcstValue 사용) ----------------
+    private String extractFcstValue(String json, String category) {
+        String pattern = "\\{[^}]*\"category\"\\s*:\\s*\"" + category
+                + "\"[^}]*\"fcstValue\"\\s*:\\s*\"([^\"]+)\"[^}]*}";
         Matcher m = Pattern.compile(pattern).matcher(json);
         return m.find() ? m.group(1) : "-";
     }

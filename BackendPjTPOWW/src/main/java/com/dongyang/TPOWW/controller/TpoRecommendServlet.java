@@ -72,39 +72,94 @@ public class TpoRecommendServlet extends HttpServlet {
                 LocalDate today = LocalDate.now();
                 LocalDate targetDate = LocalDate.parse(whenDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 daysDiff = ChronoUnit.DAYS.between(today, targetDate);
+
+                // 디버그: 날짜 계산 확인
+                System.out.println("=== 날짜 계산 디버그 ===");
+                System.out.println("오늘: " + today);
+                System.out.println("선택 날짜: " + targetDate);
+                System.out.println("일수 차이: " + daysDiff);
+                System.out.println("daysDiff > 2: " + (daysDiff > 2));
+                System.out.println("======================");
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
-        if (daysDiff > 2) { // 3일 후부터는 중기예보 사용 (단기예보는 모레까지)
+        if (daysDiff > 2) { // 3일 후부터는 중기예보 사용
             String midLandJson = (String) session.getAttribute("midLandJson");
             String midTaJson = (String) session.getAttribute("midTaJson");
+            weatherInfo.append(daysDiff).append("일 후 예상 날씨: ");
+            // 디버그: JSON 데이터 확인
+            System.out.println("=== 중기예보 디버그 ===");
+            System.out.println("midTaJson: "
+                    + (midTaJson != null ? midTaJson.substring(0, Math.min(200, midTaJson.length())) : "null"));
+            System.out.println("midLandJson: "
+                    + (midLandJson != null ? midLandJson.substring(0, Math.min(200, midLandJson.length())) : "null"));
+            System.out.println("targetDay: " + daysDiff);
+            System.out.println("======================");
+            boolean foundData = false;
 
-            // 간단하게 JSON이 있다는 것만 알려주고 AI가 알아서 해석하게 하거나,
-            // 여기서 파싱해서 해당 날짜의 날씨를 추출해야 함.
-            // AI에게 전체 JSON을 넘기기엔 너무 길 수 있으므로, "중기예보 데이터 참조"라고 하고
-            // 실제로는 TpoService에서 프롬프트에 녹이는 게 좋음.
-            // 하지만 여기서는 편의상 "중기예보: (대략적인 정보)" 형태로 넣거나
-            // 그냥 "날씨: 맑음 (예상)" 처럼 퉁칠 수도 있음.
-            // 가장 좋은 건 AI에게 "3일 뒤 날씨는 중기예보 데이터를 참고해"라고 하는 것.
+            // 중기 기온 예보 파싱
+            if (midTaJson != null && !midTaJson.isEmpty()) {
+                int targetDay = (int) daysDiff;
+                String tempKey = "taMin" + targetDay;
+                String tempMaxKey = "taMax" + targetDay;
+                String minTemp = extractJsonValue(midTaJson, tempKey);
+                String maxTemp = extractJsonValue(midTaJson, tempMaxKey);
+                if (minTemp != null && maxTemp != null) {
+                    weatherInfo.append("최저 ").append(minTemp).append("°C, ");
+                    weatherInfo.append("최고 ").append(maxTemp).append("°C");
+                    foundData = true;
+                }
+            }
 
-            weatherInfo.append(" (중기예보 구간: ").append(daysDiff).append("일 후). ");
-            if (midLandJson != null)
-                weatherInfo.append("중기육상예보 데이터 보유. ");
-            if (midTaJson != null)
-                weatherInfo.append("중기기온예보 데이터 보유. ");
+            // 중기 육상 예보 파싱
+            if (midLandJson != null && !midLandJson.isEmpty()) {
+                int targetDay = (int) daysDiff;
+                String wfKey = "wf" + targetDay + "Am";
+                String wf = extractJsonValue(midLandJson, wfKey);
+                if (wf != null && !wf.isEmpty()) {
+                    if (foundData) {
+                        weatherInfo.append(". ");
+                    }
+                    weatherInfo.append("날씨: ").append(wf);
+                    foundData = true;
+                }
+            }
 
-            // 실제 프롬프트 구성은 TpoService에서 할 수도 있지만,
-            // 여기서는 weatherInfo에 다 때려박는 구조이므로
-            // AI가 JSON을 해석할 수 있다고 가정하고 일부를 텍스트로 넣어줄 수도 있음.
-            // 일단은 "중기예보 데이터를 참고하여 추천해줘"라는 뉘앙스로 전달.
+            if (!foundData) {
+                weatherInfo.append("중기예보 분석 중");
+            }
         } else {
-            // 단기예보 (기존 로직)
-            weatherInfo.append("현재 기온: ").append(t1h != null ? t1h + "도" : "정보 없음").append(", ");
-            weatherInfo.append("습도: ").append(reh != null ? reh + "%" : "정보 없음").append(". ");
-            if (forecastList != null && !forecastList.isEmpty()) {
-                weatherInfo.append(" (단기예보 데이터 보유)");
+            // 3일 이내: 단기예보 사용
+            if (whenDateStr != null && forecastList != null && !forecastList.isEmpty()) {
+                try {
+                    LocalDate targetDate = LocalDate.parse(whenDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    String targetDateStr = targetDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+                    String minTemp = null, maxTemp = null;
+                    for (ForecastItem item : forecastList) {
+                        if (item.getFcstDate().equals(targetDateStr) && "TMP".equals(item.getCategory())) {
+                            int temp = Integer.parseInt(item.getFcstValue());
+                            if (minTemp == null || temp < Integer.parseInt(minTemp)) {
+                                minTemp = item.getFcstValue();
+                            }
+                            if (maxTemp == null || temp > Integer.parseInt(maxTemp)) {
+                                maxTemp = item.getFcstValue();
+                            }
+                        }
+                    }
+
+                    weatherInfo.append(daysDiff).append("일 후: 최저 ")
+                            .append(minTemp != null ? minTemp : "-")
+                            .append("°C, 최고 ")
+                            .append(maxTemp != null ? maxTemp : "-")
+                            .append("°C");
+                } catch (Exception e) {
+                    weatherInfo.append("날씨 정보 없음");
+                }
+            } else {
+                weatherInfo.append("날씨 정보 없음");
             }
         }
 
@@ -150,6 +205,7 @@ public class TpoRecommendServlet extends HttpServlet {
         hDto.setWhat(req.getWhat());
         hDto.setWeatherSummary(result.getWeatherSummary()); // TpoResult에 날씨 요약이 있다고 가정
         hDto.setAiRecommend(result.getAiRecommend());
+        hDto.setReasonSummary(result.getReasonSummary());
 
         TpoHistoryDAO hDao = new TpoHistoryDAO();
         hDao.insertHistory(hDto);
@@ -185,5 +241,66 @@ public class TpoRecommendServlet extends HttpServlet {
         r.setPcolor(request.getParameter("pcolor"));
 
         return r;
+    }
+
+    /**
+     * JSON 문자열에서 특정 키의 값을 추출하는 헬퍼 메서드
+     * 간단한 파싱으로 "키":"값" 형태를 찾아서 반환
+     * 
+     * @param jsonString JSON 문자열
+     * @param key        찾을 키
+     * @return 키에 해당하는 값 (없으면 null)
+     */
+    private String extractJsonValue(String jsonString, String key) {
+        if (jsonString == null || key == null) {
+            return null;
+        }
+        // "key": 패턴 찾기 (공백 고려)
+        String searchPattern = "\"" + key + "\"";
+        int keyIndex = jsonString.indexOf(searchPattern);
+
+        if (keyIndex == -1) {
+            return null;
+        }
+
+        // 콜론 위치 찾기
+        int colonIndex = jsonString.indexOf(":", keyIndex);
+        if (colonIndex == -1) {
+            return null;
+        }
+
+        // 콜론 다음 공백 건너뛰기
+        int valueStart = colonIndex + 1;
+        while (valueStart < jsonString.length() &&
+                (jsonString.charAt(valueStart) == ' ' ||
+                        jsonString.charAt(valueStart) == '\t')) {
+            valueStart++;
+        }
+
+        if (valueStart >= jsonString.length()) {
+            return null;
+        }
+
+        // 값이 문자열인 경우 (따옴표로 시작)
+        if (jsonString.charAt(valueStart) == '"') {
+            valueStart++; // 시작 따옴표 건너뛰기
+            int valueEnd = jsonString.indexOf('"', valueStart);
+            if (valueEnd == -1) {
+                return null;
+            }
+            return jsonString.substring(valueStart, valueEnd);
+        }
+        // 값이 숫자인 경우
+        else {
+            int valueEnd = valueStart;
+            while (valueEnd < jsonString.length()) {
+                char c = jsonString.charAt(valueEnd);
+                if (!Character.isDigit(c) && c != '.' && c != '-') {
+                    break;
+                }
+                valueEnd++;
+            }
+            return jsonString.substring(valueStart, valueEnd).trim();
+        }
     }
 }

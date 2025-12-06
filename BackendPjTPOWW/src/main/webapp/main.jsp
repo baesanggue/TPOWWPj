@@ -18,28 +18,39 @@
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <div class="big-icon">
-                            <c:choose>
-                                <c:when test="${pty eq '1' or pty eq '4' or pty eq '5'}">🌧️</c:when>
-                                <c:when test="${pty eq '2' or pty eq '3' or pty eq '6' or pty eq '7'}">☃️</c:when>
-                                <c:otherwise>☀️</c:otherwise>
-                            </c:choose>
-                        </div>
+                        <% String pty=(String) session.getAttribute("PTY"); String sky=(String)
+                            session.getAttribute("SKY"); String weatherIcon="☀️" ; if (pty !=null && !pty.equals("0")) {
+                            if (pty.equals("1")) weatherIcon="🌧️" ; else if (pty.equals("2")) weatherIcon="🌧️❄️" ;
+                            else if (pty.equals("3")) weatherIcon="❄️" ; else if (pty.equals("4") || pty.equals("5"))
+                            weatherIcon="🌧️" ; else if (pty.equals("6") || pty.equals("7")) weatherIcon="❄️🌧️" ; }
+                            else if (sky !=null) { String hour=new java.text.SimpleDateFormat("HH").format(new
+                            java.util.Date()); int currentHour=Integer.parseInt(hour); boolean isNight=(currentHour>= 18
+                            || currentHour < 6); if (sky.equals("1")) weatherIcon=isNight ? "🌙" : "☀️" ; else if
+                                (sky.equals("3")) weatherIcon=isNight ? "☁️🌙" : "⛅" ; else if (sky.equals("4"))
+                                weatherIcon="☁️" ; } %>
+                                <div class="big-icon">
+                                    <%= weatherIcon %>
+                                </div>
 
-                        <div class="big-temp">
-                            ${not empty t1h ? t1h : '-'}°
-                        </div>
+                                <div class="big-temp">
+                                    ${not empty t1h ? t1h : '-'}°
+                                </div>
 
-                        <div class="weather-desc">
-                            <c:choose>
-                                <c:when test="${pty eq '1' or pty eq '4' or pty eq '5'}">비</c:when>
-                                <c:when test="${pty eq '2' or pty eq '3' or pty eq '6' or pty eq '7'}">눈/비</c:when>
-                                <c:otherwise>맑음 (강수없음)</c:otherwise>
-                            </c:choose>
-                            <span class="font-small text-gray">
-                                습도 ${reh}% / 바람 ${wsd}m/s
-                            </span>
-                        </div>
+                                <div class="weather-desc">
+                                    <c:choose>
+                                        <c:when test="${PTY eq '1' or PTY eq '4' or PTY eq '5'}">
+                                            비<c:if test="${not empty POP and POP ne '-'}"> (${POP}%)</c:if>
+                                        </c:when>
+                                        <c:when test="${PTY eq '2' or PTY eq '3' or PTY eq '6' or PTY eq '7'}">
+                                            눈/비<c:if test="${not empty POP and POP ne '-'}"> (${POP}%)</c:if>
+                                        </c:when>
+                                        <c:when test="${not empty POP and POP ne '-'}">강수확률 ${POP}%</c:when>
+                                        <c:otherwise>맑음</c:otherwise>
+                                    </c:choose>
+                                    <span class="font-small text-gray">
+                                        습도 ${reh}% / 바람 ${wsd}m/s
+                                    </span>
+                                </div>
                     </c:otherwise>
                 </c:choose>
 
@@ -47,8 +58,7 @@
                     <button type="button" class="btn-tpo" onclick="location.href='tpo.do'">
                         TPO 추천
                     </button>
-                    <button type="button" class="btn-secondary" onclick="location.href='mypage.do'"
-                        style="margin-top: 20px; padding: 15px 30px; font-size: 1.2em; border-radius: 30px;">
+                    <button type="button" class="btn-navigation" onclick="location.href='mypage.do'">
                         마이페이지
                     </button>
                 </div>

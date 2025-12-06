@@ -185,11 +185,21 @@
                             var maxDateStr = yyyyMax + '-' + mmMax + '-' + ddMax;
 
                             var dateInput = document.getElementById('whenDate');
+                            // 날짜 선택 시 중기예보 데이터 미리 로드
+                            dateInput.addEventListener('change', function () {
+                                var selectedRegion = document.getElementById('region').value;
+                                if (selectedRegion && this.value) {
+                                    var url = '${pageContext.request.contextPath}/weather.do?region=' + selectedRegion;
+                                    fetch(url, { method: 'POST' })
+                                        .then(response => console.log('중기예보 데이터 로드 완료'))
+                                        .catch(error => console.error('weather.do 호출 실패:', error));
+                                }
+                            });
                             if (dateInput) {
                                 dateInput.setAttribute('min', todayStr);
                                 dateInput.setAttribute('max', maxDateStr);
                             }
-                        });
+                        })
                     </script>
         </body>
 

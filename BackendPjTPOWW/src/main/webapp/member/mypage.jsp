@@ -8,6 +8,7 @@
             <meta charset="UTF-8">
             <title>마이페이지</title>
             <link rel="stylesheet" type="text/css" href="<c:url value='/css/cartoon_theme.css'/>">
+            <link rel="stylesheet" type="text/css" href="<c:url value='/css/custom_grid.css'/>">
         </head>
 
         <body>
@@ -118,15 +119,15 @@
                     <h3>최근 코디 추천 히스토리</h3>
                     <c:choose>
                         <c:when test="${not empty historyList}">
-                            <ul class="history-summary-list list-none">
-                                <c:forEach var="h" items="${historyList}" begin="0" end="4">
-                                    <li class="history-item">
+                            <div class="history-summary-grid">
+                                <c:forEach var="h" items="${historyList}" begin="0" end="5">
+                                    <div class="history-summary-item">
                                         <div class="history-date">${h.requestDate} ${h.requestTime}</div>
-                                        <div class="history-what">${h.what}</div>
+                                        <div class="history-what">📍 ${h.what}</div>
                                         <div class="history-recommend">${h.aiRecommend}</div>
-                                    </li>
+                                    </div>
                                 </c:forEach>
-                            </ul>
+                            </div>
                             <div class="text-center mt-20">
                                 <a href="<c:url value='/history.do' />" class="btn-secondary">히스토리 전체 보기</a>
                             </div>

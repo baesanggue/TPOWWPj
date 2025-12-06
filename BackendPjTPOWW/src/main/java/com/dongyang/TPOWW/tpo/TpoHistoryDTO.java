@@ -10,6 +10,7 @@ public class TpoHistoryDTO {
     private String what;
     private String weatherSummary;
     private String aiRecommend;
+    private String reasonSummary; // AI 추천 이유 추가
     private Timestamp createdAt;
 
     public int gethId() {
@@ -66,6 +67,14 @@ public class TpoHistoryDTO {
 
     public void setAiRecommend(String aiRecommend) {
         this.aiRecommend = aiRecommend;
+    }
+
+    public String getReasonSummary() {
+        return reasonSummary;
+    }
+
+    public void setReasonSummary(String reasonSummary) {
+        this.reasonSummary = reasonSummary;
     }
 
     public Timestamp getCreatedAt() {

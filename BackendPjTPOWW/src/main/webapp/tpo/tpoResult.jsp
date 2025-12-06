@@ -35,6 +35,18 @@
                                         </p>
                                     </div>
 
+                                    <c:if test="${not empty tpoResult.reasonSummary}">
+                                        <div class="mb-30">
+                                            <h3 class="dashed-bottom">
+                                                💡 선택 이유 요약
+                                            </h3>
+                                            <div class="result-box"
+                                                style="text-align: left !important; white-space: pre-wrap;">
+                                                ${tpoResult.reasonSummary}
+                                            </div>
+                                        </div>
+                                    </c:if>
+
                                     <div class="mb-30">
                                         <h3 class="dashed-bottom">
                                             🤖 AI의 추천

@@ -104,77 +104,95 @@ header {
     color: #aaa;
 }
 
-/* =========================================
-   4. Buttons
-   ========================================= */
+
+
+/* 모든 버튼 통일 */
 button,
 .btn-primary,
 .btn-secondary,
+.btn-tpo,
+.btn-navigation,
+.btn-danger {
+    height: 48px !important;
+    line-height: 1 !important;
+    padding: 0 20px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: none !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    border-radius: 10px !important;
+    font-family: 'Jua', sans-serif !important;
+    box-sizing: border-box !important;
+}
+
 .btn-tpo {
-    font-family: 'Jua', sans-serif;
-    cursor: pointer;
-    border: none;
-    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
+    height: 60px !important;
+    font-size: 1.3em !important;
+    padding: 0 60px !important;
 }
 
-/* Login Button: Dark Blue */
-.btn-primary {
-    background: #4A6FA5;
-    /* Darker blue from image */
-    color: white;
-    padding: 12px 25px;
-    border-radius: 10px;
-    font-size: 1em;
-    box-shadow: 0 4px 0 rgba(50, 80, 130, 0.3);
-    /* Hard shadow for cartoon feel */
-}
-
-.btn-primary:hover {
-    background: #5A7FB5;
-    transform: translateY(-2px);
-}
-
-/* Sign Up / Secondary: Light Blue Outline or Background */
-.btn-secondary {
-    background: rgba(255, 255, 255, 0.3);
-    color: #333;
-    border: 2px solid #fff;
-    padding: 10px 20px;
-    border-radius: 10px;
-    font-size: 1em;
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.5);
-}
-
-/* TPO Recommendation Button: The Big Blue One */
+/* TPO 추천 버튼 - 파란색 */
 .btn-tpo {
-    background: #4A90E2;
-    /* Bright Blue */
-    color: white;
-    padding: 20px 60px;
-    font-size: 1.8em;
-    border-radius: 15px;
-    box-shadow: 0 6px 0 #357ABD;
-    /* 3D effect */
-    margin-top: 30px;
-    width: auto;
-    min-width: 300px;
+    background: #4A90E2 !important;
+    color: white !important;
+    box-shadow: 0 5px 0 #2E6DB8, 0 6px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn-tpo:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 0 #357ABD;
+    background: #5BA3F5 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 7px 0 #2E6DB8, 0 8px 10px rgba(0, 0, 0, 0.25);
 }
 
-.btn-tpo.large {
-    width: 100%;
-    padding: 20px;
+/* 주요 액션 버튼 - 녹색 */
+.btn-primary {
+    background: #27AE60 !important;
+    color: white !important;
+    box-shadow: 0 5px 0 #1E8449, 0 6px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary:hover {
+    background: #2ECC71 !important;
+    transform: translateY(-2px);
+}
+
+/* 보조 버튼 - 회색 */
+.btn-secondary {
+    background: #7F8C8D !important;
+    color: white !important;
+    box-shadow: 0 5px 0 #5D6B6C, 0 6px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary:hover {
+    background: #95A5A6 !important;
+    transform: translateY(-2px);
+}
+
+/* 네비게이션 버튼 - 남색 */
+.btn-navigation {
+    background: #667BC6 !important;
+    color: white !important;
+    box-shadow: 0 5px 0 #4A5D9F, 0 6px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-navigation:hover {
+    background: #7A8DD8 !important;
+    transform: translateY(-2px);
+}
+
+/* 위험 버튼 - 빨간색 */
+.btn-danger {
+    background: #E74C3C !important;
+    color: white !important;
+    box-shadow: 0 5px 0 #C0392B, 0 6px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-danger:hover {
+    background: #EC7063 !important;
+    transform: translateY(-2px);
 }
 
 .button-group {
@@ -430,6 +448,10 @@ footer {
     white-space: pre-wrap;
     line-height: 1.8;
     font-size: 1.1em;
+    text-align: left !important;
+    display: block;
+    text-align: left;
+    font-family: 'Jua', sans-serif !important;
 }
 
 @keyframes float {
