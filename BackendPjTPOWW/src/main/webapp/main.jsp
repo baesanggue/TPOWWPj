@@ -72,14 +72,15 @@
                             <div class="daily-day">${day.dayOfWeek}</div>
                             <div class="daily-date font-small text-dark-gray">${day.date}</div>
 
+
                             <div class="weather-icon">
-                                <c:choose>
-                                    <c:when test="${day.weatherState eq 'sunny'}">☀️</c:when>
-                                    <c:when test="${day.weatherState eq 'cloudy'}">☁️</c:when>
-                                    <c:when test="${day.weatherState eq 'rainy'}">🌧️</c:when>
-                                    <c:when test="${day.weatherState eq 'snowy'}">☃️</c:when>
-                                    <c:otherwise>❓</c:otherwise>
-                                </c:choose>
+                                <% com.dongyang.TPOWW.weather.DailyWeatherDTO
+                                    currentDay=(com.dongyang.TPOWW.weather.DailyWeatherDTO)pageContext.getAttribute("day");
+                                    String weatherIcon="❓" ; if (currentDay !=null) { String
+                                    ws=currentDay.getWeatherState(); if ("sunny".equals(ws)) weatherIcon="☀️" ; else if
+                                    ("cloudy".equals(ws)) weatherIcon="☁️" ; else if ("rainy".equals(ws))
+                                    weatherIcon="🌧️" ; else if ("snowy".equals(ws)) weatherIcon="☃️" ; } %>
+                                    <%= weatherIcon %>
                             </div>
 
                             <div class="temp-range">

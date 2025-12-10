@@ -474,6 +474,13 @@ public class WeatherServlet extends HttpServlet {
                 }
             }
 
+            // 디버그: 최종 state 값 확인
+            System.out.println("=== processDailyWeather 디버그 ===");
+            System.out.println("날짜: " + date + " (" + dayOfWeek + ")");
+            System.out.println("maxPty: " + maxPty + ", maxSky: " + maxSky);
+            System.out.println("최종 state: " + state + ", desc: " + desc);
+            System.out.println("===================================");
+
             result.add(new DailyWeatherDTO(
                     date,
                     dayOfWeek,
