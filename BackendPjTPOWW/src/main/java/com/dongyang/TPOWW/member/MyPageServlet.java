@@ -117,6 +117,24 @@ public class MyPageServlet extends HttpServlet {
         sessionUser.setSigungu(sigungu);
         session.setAttribute("udto", sessionUser);
 
+        // [추가] 지역 변경 시 날씨 데이터 갱신을 위해 기존 날씨 세션 삭제
+        // index.jsp에서 t1h가 없으면 weather.do를 호출하도록 되어 있음
+        session.removeAttribute("t1h");
+        session.removeAttribute("reh");
+        session.removeAttribute("rn1");
+        session.removeAttribute("wsd");
+        session.removeAttribute("PTY");
+        session.removeAttribute("SKY");
+        session.removeAttribute("POP");
+        session.removeAttribute("forecastList");
+        session.removeAttribute("threeDayForecast");
+        session.removeAttribute("midLandJson");
+        session.removeAttribute("midTaJson");
+        // 좌표 및 지역명도 삭제 (WeatherServlet에서 재설정됨)
+        session.removeAttribute("nx");
+        session.removeAttribute("ny");
+        session.removeAttribute("currentRegion");
+
         // 다시 마이페이지로 이동 (PRG 패턴)
         response.sendRedirect("mypage.do");
     }
