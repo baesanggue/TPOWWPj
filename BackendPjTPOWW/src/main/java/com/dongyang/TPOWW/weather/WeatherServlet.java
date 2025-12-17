@@ -41,7 +41,14 @@ public class WeatherServlet extends HttpServlet {
         response.setContentType("text/html; charset=UTF-8");
 
         HttpSession session = request.getSession();
+        System.out.println("[WeatherServlet] Session ID: " + session.getId());
+
         UserDTO udto = (UserDTO) session.getAttribute("udto");
+        if (udto == null) {
+            System.out.println("[WeatherServlet] udto is NULL in session");
+        } else {
+            System.out.println("[WeatherServlet] udto found. ID: " + udto.getId() + ", Region: " + udto.getRegion());
+        }
 
         // 1. 기본값 설정 (로그인 안 했을 때: 서울 종로구)
         String nx = "60";
